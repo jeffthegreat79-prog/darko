@@ -92,12 +92,58 @@ function App() {
 
   const [catchResult, setCatchResult] = useState(null)
   const [isFishing, setIsFishing] = useState(false)
-
+const [fishingPhase, setFishingPhase] = useState('idle')
   useEffect(() => {
     localStorage.setItem('darko-player', JSON.stringify(player))
   }, [player])
 
   function castLine() {
+  if (isFishing) return
+
+  setIsFishing(true)
+  setCatchResult(null)
+  setFishingPhase('casting')
+
+  setTimeout(() => {
+    setFishingPhase('waiting')
+  }, 600)
+
+  setTimeout(() => {
+    setFishingPhase('bite')
+  }, 1800)
+
+  setTimeout(() => {
+    const caughtFish = getRandomFish()
+    const weight = Number((Math.random() * 24 + 1).toFixed(1))
+
+    const completedCatch = {
+      ...caughtFish,
+      weight,
+      caughtAt: new Date().toISOString(),
+    }
+
+    setCatchResult(completedCatch)
+    setFishingPhase('caught')
+
+    setPlayer((currentPlayer) => {
+      const isBiggestCatch =
+        !currentPlayer.biggestCatch ||
+        completedCatch.weight > currentPlayer.biggestCatch.weight
+
+      return {
+        ...currentPlayer,
+        coins: currentPlayer.coins + completedCatch.value,
+        catches: currentPlayer.catches + 1,
+        inventory: [completedCatch, ...currentPlayer.inventory].slice(0, 25),
+        biggestCatch: isBiggestCatch
+          ? completedCatch
+          : currentPlayer.biggestCatch,
+      }
+    })
+
+    setIsFishing(false)
+  }, 2600)
+} {
     if (isFishing) return
 
     setIsFishing(true)
@@ -219,14 +265,27 @@ function App() {
           </div>
 
           <div className="catch-display" aria-live="polite">
-            {isFishing && (
-              <p className="fishing-message">
-                Something is moving beneath the water...
-              </p>
-            )}
+            {fishingPhase === 'casting' && (
+  <p className="fishing-message">Casting your line...</p>
+)}
+
+{fishingPhase === 'waiting' && (
+  <p className="fishing-message">
+    The bobber is drifting. Wait for it...
+  </p>
+)}
+
+{fishingPhase === 'bite' && (
+  <p className="fishing-message bite-message">
+    ❗ Something took the bait!
+  </p>
+)}
+            
 
             {catchResult && (
-              <div className="catch-card">
+              <div
+  className={`catch-card catch-reveal ${catchResult.rarity.toLowerCase()}-catch`}
+>
                 <span className="catch-icon">{catchResult.icon}</span>
 
                 <div>
@@ -247,12 +306,19 @@ function App() {
           </div>
         </div>
 
-        <div className="hero-art" aria-hidden="true">
+        <div
+  className={`hero-art fishing-${fishingPhase}`}
+  aria-hidden="true"
+>
           <div className="moon" />
           <div className="fishing-line" />
           <div className="bobber">
-            <span />
-          </div>
+  <span />
+</div>
+
+<div className="splash-ring splash-ring-one" />
+<div className="splash-ring splash-ring-two" />
+<div className="bite-alert">!</div>
           <div className="water water-back" />
           <div className="water water-front" />
           <div className="fish-shadow fish-one">➤</div>
