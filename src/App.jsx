@@ -146,10 +146,11 @@ const defaultPlayer = {
   catches: 0,
   inventory: [],
   biggestCatch: null,
-  rod: null,
-  bait: null,
   ownedRods: [],
   ownedBaits: [],
+  rod: null,
+  bait: null,
+  speciesRecords: {},
 }
 
 function App() {
@@ -296,20 +297,36 @@ const completedCatch = {
       setFishingPhase('caught')
 
       setPlayer((currentPlayer) => {
-        const isBiggestCatch =
-          !currentPlayer.biggestCatch ||
-          completedCatch.weight > currentPlayer.biggestCatch.weight
+  const isBiggestCatch =
+    !currentPlayer.biggestCatch ||
+    completedCatch.weight > currentPlayer.biggestCatch.weight
 
-        return {
-          ...currentPlayer,
-          coins: currentPlayer.coins + completedCatch.value,
-          catches: currentPlayer.catches + 1,
-          inventory: [completedCatch, ...currentPlayer.inventory].slice(0, 25),
-          biggestCatch: isBiggestCatch
-            ? completedCatch
-            : currentPlayer.biggestCatch,
-        }
-      })
+  const currentSpeciesRecord =
+    currentPlayer.speciesRecords?.[completedCatch.name]
+
+  const isNewSpeciesRecord =
+    !currentSpeciesRecord ||
+    completedCatch.weight > currentSpeciesRecord.weight
+
+  const updatedSpeciesRecords = {
+    ...(currentPlayer.speciesRecords || {}),
+  }
+
+  if (isNewSpeciesRecord) {
+    updatedSpeciesRecords[completedCatch.name] = completedCatch
+  }
+
+  return {
+    ...currentPlayer,
+    coins: currentPlayer.coins + completedCatch.value,
+    catches: currentPlayer.catches + 1,
+    inventory: [completedCatch, ...currentPlayer.inventory].slice(0, 25),
+    biggestCatch: isBiggestCatch
+      ? completedCatch
+      : currentPlayer.biggestCatch,
+    speciesRecords: updatedSpeciesRecords,
+  }
+})
 
       setIsFishing(false)
     }, 2600)
@@ -519,7 +536,36 @@ const completedCatch = {
           </div>
         )}
       </section>
+<section className="records-section">
+  <div className="section-heading">
+    <p className="eyebrow">Personal bests</p>
+    <h2>🏆 Species Records</h2>
+    <p>Your heaviest catch for every species.</p>
+  </div>
 
+  <div className="records-grid">
+    {fishTable.map((fish) => {
+      const record = player.speciesRecords?.[fish.name]
+
+      return (
+        <div className="record-card" key={fish.name}>
+          <div className="record-fish">
+            <span className="record-icon">{fish.icon}</span>
+
+            <div>
+              <h3>{fish.name}</h3>
+              <p>{fish.rarity}</p>
+            </div>
+          </div>
+
+          <strong className="record-weight">
+            {record ? `${record.weight} lb` : 'Not caught'}
+          </strong>
+        </div>
+      )
+    })}
+  </div>
+</section>
       <section className="features" id="features">
         <div className="section-heading">
           <p className="eyebrow">Coming next</p>
