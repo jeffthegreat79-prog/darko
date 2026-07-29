@@ -3,45 +3,75 @@ import './App.css'
 
 const fishTable = [
   {
-    name: 'Bluegill',
-    rarity: 'Common',
-    value: 12,
-    chance: 40,
-    icon: '🐟',
-  },
+  name: 'Bluegill',
+  rarity: 'Common',
+  value: 12,
+  chance: 40,
+  minWeight: 0.2,
+  maxWeight: 2.5,
+  icon: '🐟',
+},
   {
     name: 'Yellow Perch',
     rarity: 'Common',
     value: 16,
     chance: 25,
-    icon: '🐟',
+    minWeight: 0.2,
+  maxWeight: 3.5,
+  icon: '🐟',
+  },
+  {
+    name: 'German Brown Trout',
+    rarity: 'Uncommon',
+    value: 95,
+    chance: 8,
+    minWeight: 0.6,
+  maxWeight: 4.0,
+  icon: '🐠',
   },
   {
     name: 'Rainbow Trout',
     rarity: 'Uncommon',
     value: 35,
     chance: 16,
-    icon: '🐠',
+    minWeight: 0.6,
+  maxWeight: 4.0,
+  icon: '🐠',
+  },
+  {
+    name: 'Smallmouth Bass',
+    rarity: 'Uncommon',
+    value: 35,
+    chance: 16,
+    minWeight: 0.6,
+  maxWeight: 4.0,
+  icon: '🐠',
   },
   {
     name: 'Largemouth Bass',
     rarity: 'Rare',
     value: 85,
     chance: 10,
-    icon: '🐟',
+    minWeight: 2.0,
+  maxWeight: 10.0,
+  icon: '🐟',
   },
   {
     name: 'King Salmon',
     rarity: 'Epic',
     value: 175,
     chance: 6,
-    icon: '🐠',
+    minWeight: 3.0,
+  maxWeight: 15.0,
+  icon: '🐠',
   },
   {
     name: 'Golden Koi',
     rarity: 'Legendary',
     value: 500,
     chance: 2.5,
+    minWeight: 0.6,
+    maxWeight: 4.0,
     icon: '✨',
   },
   {
@@ -49,17 +79,146 @@ const fishTable = [
     rarity: 'Mythical',
     value: 2500,
     chance: 0.5,
+    minWeight: 0.2,
+    maxWeight: 2.5,
     icon: '🐉',
   },
+];
+const rods = [
+  {
+    name: "Grandpa's old Rod",
+    cost: 0,
+    bonus: 0,
+    weightCap: 0.7,
+  },
+  {
+    name: 'Fiberglass Rod',
+    cost: 150,
+    bonus: 3,
+    weightCap: 0.85,
+  },
+  {
+    name: 'Carbon Rod',
+    cost: 500,
+    bonus: 7,
+    weightCap: 1,
+  },
+  {
+    name: 'Legendary Rod',
+    cost: 1500,
+    bonus: 12,
+    weightCap: 1.1,
+  },
 ]
-
+;
+const baits = [
+  {
+    name: 'Worm',
+    cost: 10,
+    bonus: 0,
+    rareBonus: 0,
+    icon: '🪱',
+  },
+  {
+    name: 'Minnow',
+    cost: 40,
+    bonus: 2,
+    rareBonus: 3,
+    icon: '🐟',
+  },
+  {
+    name: 'Cricket',
+    cost: 75,
+    bonus: 4,
+    rareBonus: 6,
+    icon: '🦗',
+  },
+  {
+    name: 'Golden Lure',
+    cost: 200,
+    bonus: 8,
+    rareBonus: 12,
+    icon: '✨',
+  },
+]
 const defaultPlayer = {
   coins: 0,
   catches: 0,
   inventory: [],
   biggestCatch: null,
+  rod: null,
+  bait: null,
+  ownedRods: [],
+  ownedBaits: [],
 }
 
+function App() {
+  const [player, setPlayer] = useState(() => {
+    const savedPlayer = localStorage.getItem('darko-player')
+
+    if (!savedPlayer) {
+      return defaultPlayer
+    }
+
+    try {
+      return {
+  ...defaultPlayer,
+  ...JSON.parse(savedPlayer),
+}
+    } catch {
+      return defaultPlayer
+    }
+  })
+
+  const [catchResult, setCatchResult] = useState(null)
+
+const [isFishing, setIsFishing] = useState(false)
+
+const [fishingPhase, setFishingPhase] = useState('idle')
+
+const [shopOpen, setShopOpen] = useState(false)
+
+  useEffect(() => {
+    localStorage.setItem('darko-player', JSON.stringify(player))
+  }, [player])
+function buyRod(rod) {
+  if (player.coins < rod.cost) return
+
+  if ((player.ownedRods ?? []).includes(rod.name)) return
+
+  
+}
+function equipRod(rod) {
+  if (!(player.ownedRods ?? []).includes(rod.name)) return
+
+  setPlayer((current) => ({
+    ...current,
+    rod: rod.name,
+  }))
+}
+function buyBait(bait) {
+  if ((player.ownedBaits ?? []).includes(bait.name)) return
+
+  if (player.coins < bait.cost) {
+    alert('You do not have enough coins!')
+    return
+  }
+
+  setPlayer((current) => ({
+    ...current,
+    coins: current.coins - bait.cost,
+    ownedBaits: [...(current.ownedBaits ?? []), bait.name],
+  }))
+}
+
+function equipBait(bait) {
+  if (!(player.ownedBaits ?? []).includes(bait.name)) return
+
+  setPlayer((current) => ({
+    ...current,
+    bait: bait.name,
+  }))
+}
 function getRandomFish() {
   const roll = Math.random() * 100
   let runningTotal = 0
@@ -75,30 +234,7 @@ function getRandomFish() {
   return fishTable[0]
 }
 
-function App() {
-  const [player, setPlayer] = useState(() => {
-    const savedPlayer = localStorage.getItem('darko-player')
-
-    if (!savedPlayer) {
-      return defaultPlayer
-    }
-
-    try {
-      return JSON.parse(savedPlayer)
-    } catch {
-      return defaultPlayer
-    }
-  })
-
-  const [catchResult, setCatchResult] = useState(null)
-  const [isFishing, setIsFishing] = useState(false)
-  const [fishingPhase, setFishingPhase] = useState('idle')
-
-  useEffect(() => {
-    localStorage.setItem('darko-player', JSON.stringify(player))
-  }, [player])
-
-  function castLine() {
+function castLine() {
     if (isFishing) return
 
     setIsFishing(true)
@@ -115,13 +251,46 @@ function App() {
 
     setTimeout(() => {
       const caughtFish = getRandomFish()
-      const weight = Number((Math.random() * 24 + 1).toFixed(1))
 
-      const completedCatch = {
-        ...caughtFish,
-        weight,
-        caughtAt: new Date().toISOString(),
-      }
+const equippedRod = rods.find((rod) => rod.name === player.rod)
+
+const weightCap = equippedRod?.weightCap ?? 0.7
+
+let rodMaxWeight = caughtFish.maxWeight * weightCap
+
+if (equippedRod?.name === 'Legendary Rod' && Math.random() < 0.15) {
+  rodMaxWeight = caughtFish.maxWeight * 1.2
+}
+
+const weight = Number(
+  (
+    caughtFish.minWeight +
+    Math.random() * (rodMaxWeight - caughtFish.minWeight)
+  ).toFixed(1)
+)
+
+const trophyThreshold = caughtFish.maxWeight * 0.95
+
+const isTrophy = weight >= trophyThreshold
+
+const weightProgress =
+  (weight - caughtFish.minWeight) /
+  (caughtFish.maxWeight - caughtFish.minWeight)
+
+const rewardMultiplier = 0.5 + weightProgress * 1.5
+
+const reward = Math.max(
+  1,
+  Math.round(caughtFish.value * rewardMultiplier)
+)
+
+const completedCatch = {
+  ...caughtFish,
+  weight,
+  value: reward,
+  isTrophy,
+  caughtAt: new Date().toISOString(),
+}
 
       setCatchResult(completedCatch)
       setFishingPhase('caught')
@@ -254,19 +423,28 @@ function App() {
               >
                 <span className="catch-icon">{catchResult.icon}</span>
 
-                <div>
-                  <p>You caught a</p>
-                  <h2>{catchResult.name}</h2>
+               <div>
 
-                  <span
-                    className={`rarity ${catchResult.rarity.toLowerCase()}`}
-                  >
-                    {catchResult.rarity}
-                  </span>
+  <p>You caught a</p>
 
-                  <strong>{catchResult.weight} lb</strong>
-                  <strong>+{catchResult.value} coins</strong>
-                </div>
+  {catchResult.isTrophy && (
+    <div className="trophy-banner">
+      ⭐ TROPHY CATCH! ⭐
+    </div>
+  )}
+
+  <h2>{catchResult.name}</h2>
+
+  <span
+    className={`rarity ${catchResult.rarity.toLowerCase()}`}
+  >
+    {catchResult.rarity}
+  </span>
+
+  <strong>{catchResult.weight} lb</strong>
+  <strong>+{catchResult.value} coins</strong>
+
+</div>
               </div>
             )}
           </div>
@@ -355,7 +533,11 @@ function App() {
             <p>Upgrade your equipment to improve rarity and catch weight.</p>
           </article>
 
-          <article className="feature-card">
+          <article
+  className="feature-card"
+  onClick={() => setShopOpen(true)}
+  style={{ cursor: "pointer" }}
+>
             <span>🛒</span>
             <h3>Fishing shop</h3>
             <p>Spend your coins on gear, storage, boats, and new locations.</p>
@@ -373,6 +555,68 @@ function App() {
             <p>Cast directly from chat while watching the live stream.</p>
           </article>
         </div>
+       
+
+                {shopOpen && (
+          <div className="feature-card" style={{ marginTop: '2rem' }}>
+            <h3>🎣 Fishing Shop</h3>
+
+            <h4>Fishing Rods</h4>
+
+            {rods.map((rod) => (
+              <div key={rod.name} style={{ marginBottom: '1rem' }}>
+                <strong>{rod.name}</strong> - {rod.cost} coins
+
+                {player.rod === rod.name ? (
+                  <span> (Equipped)</span>
+                ) : player.ownedRods.includes(rod.name) ? (
+                  <button
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => equipRod(rod)}
+                  >
+                    Equip
+                  </button>
+                ) : (
+                  <button
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => buyRod(rod)}
+                  >
+                    Buy
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <h4 style={{ marginTop: '2rem' }}>🪱 Bait Shop</h4>
+
+            {baits.map((bait) => (
+              <div key={bait.name} style={{ marginBottom: '1rem' }}>
+                <strong>
+                  {bait.icon} {bait.name}
+                </strong>{' '}
+                - {bait.cost} coins
+
+                {player.bait === bait.name ? (
+                  <span> (Equipped)</span>
+                ) : player.ownedBaits.includes(bait.name) ? (
+                  <button
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => equipBait(bait)}
+                  >
+                    Equip
+                  </button>
+                ) : (
+                  <button
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => buyBait(bait)}
+                  >
+                    Buy
+                  </button>
+                )}
+              </div>
+            ))}
+                    </div>
+        )}
       </section>
 
       <footer>
