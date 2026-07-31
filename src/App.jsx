@@ -198,22 +198,38 @@ function equipRod(rod) {
   }))
 }
 function buyBait(bait) {
-  if ((player.ownedBaits ?? []).includes(bait.name)) return
-
   if (player.coins < bait.cost) {
-    alert('You do not have enough coins!')
+    alert("You do not have enough coins!")
     return
   }
 
-  setPlayer((current) => ({
-    ...current,
-    coins: current.coins - bait.cost,
-    ownedBaits: [...(current.ownedBaits ?? []), bait.name],
-  }))
+  setPlayer((current) => {
+    const alreadyOwned = (current.ownedBaits ?? []).includes(bait.name)
+
+    const currentQuantity =
+      current.baitCounts?.[bait.name] ?? 0
+
+    return {
+      ...current,
+
+      coins: current.coins - bait.cost,
+
+      ownedBaits: alreadyOwned
+        ? current.ownedBaits
+        : [...(current.ownedBaits ?? []), bait.name],
+
+      baitCounts: {
+        ...(current.baitCounts ?? {}),
+        [bait.name]: currentQuantity + 5,
+      },
+    }
+  })
 }
 
 function equipBait(bait) {
-  if (!(player.ownedBaits ?? []).includes(bait.name)) return
+  const quantity = player.baitCounts?.[bait.name] ?? 0
+
+  if (quantity <= 0) return
 
   setPlayer((current) => ({
     ...current,
@@ -262,6 +278,44 @@ function getRandomFish(rareBonus = 0) {
 
 function castLine() {
     if (isFishing) return
+      const equippedBaitName = player.bait
+
+  const baitQuantity = equippedBaitName
+    ? player.baitCounts?.[equippedBaitName] ?? 0
+    : 0
+
+  if (equippedBaitName && baitQuantity <= 0) {
+    alert('You are out of that bait!')
+
+    setPlayer((current) => ({
+      ...current,
+      bait: null,
+    }))
+
+    return
+  }
+
+  if (equippedBaitName) {
+    setPlayer((current) => {
+      const currentQuantity =
+        current.baitCounts?.[equippedBaitName] ?? 0
+
+      const nextQuantity = Math.max(0, currentQuantity - 1)
+
+      return {
+        ...current,
+
+        baitCounts: {
+          ...(current.baitCounts ?? {}),
+          [equippedBaitName]: nextQuantity,
+        },
+
+        bait: nextQuantity === 0
+          ? null
+          : current.bait,
+      }
+    })
+  }
 
     setIsFishing(true)
     setCatchResult(null)
@@ -277,7 +331,7 @@ function castLine() {
 
     setTimeout(() => {
       const equippedBait = baits.find(
-  (bait) => bait.name === player.bait
+  (bait) => bait.name === equippedBaitName
 )
 
 const rareBonus = equippedBait?.rareBonus ?? 0
@@ -688,32 +742,47 @@ const completedCatch = {
 
             <h4 style={{ marginTop: '2rem' }}>🪱 Bait Shop</h4>
 
-            {baits.map((bait) => (
-              <div key={bait.name} style={{ marginBottom: '1rem' }}>
-                <strong>
-                  {bait.icon} {bait.name}
-                </strong>{' '}
-                - {bait.cost} coins
+            {baits.map((bait) => {
+  const quantity = player.baitCounts?.[bait.name] ?? 0
+  const isEquipped = player.bait === bait.name
 
-                {player.bait === bait.name ? (
-                  <span> (Equipped)</span>
-                ) : player.ownedBaits.includes(bait.name) ? (
-                  <button
-                    style={{ marginLeft: '1rem' }}
-                    onClick={() => equipBait(bait)}
-                  >
-                    Equip
-                  </button>
-                ) : (
-                  <button
-                    style={{ marginLeft: '1rem' }}
-                    onClick={() => buyBait(bait)}
-                  >
-                    Buy
-                  </button>
-                )}
-              </div>
-            ))}
+  return (
+    <div
+      key={bait.name}
+      style={{ marginBottom: '1rem' }}
+    >
+      <strong>
+        {bait.icon} {bait.name}
+      </strong>
+
+      <div>
+        {bait.cost} coins — 5 pieces
+      </div>
+
+      <div>
+        Quantity: <strong>{quantity}</strong>
+      </div>
+
+      {isEquipped ? (
+        <span>Equipped</span>
+      ) : quantity > 0 ? (
+        <button
+          style={{ marginLeft: '1rem' }}
+          onClick={() => equipBait(bait)}
+        >
+          Equip
+        </button>
+      ) : null}
+
+      <button
+        style={{ marginLeft: '1rem' }}
+        onClick={() => buyBait(bait)}
+      >
+        Buy 5
+      </button>
+    </div>
+  )
+})}
                     </div>
         )}
       </section>
