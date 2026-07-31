@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const fishTable = [
@@ -170,7 +170,145 @@ function App() {
       return defaultPlayer
     }
   })
+const [soundEnabled, setSoundEnabled] = useState(() => {
+  return localStorage.getItem('darko-sound') !== 'off'
+})
+useEffect(() => {
+  localStorage.setItem(
+    'darko-sound',
+    soundEnabled ? 'on' : 'off'
+  )
+}, [soundEnabled])
+const audioContextRef = useRef(null)
+function playTone({
+  frequency = 440,
+  endFrequency = frequency,
+  duration = 0.15,
+  type = 'sine',
+  volume = 0.08,
+  delay = 0,
+}) {
+  if (!soundEnabled) return
 
+  const AudioContextClass =
+    window.AudioContext || window.webkitAudioContext
+
+  if (!AudioContextClass) return
+
+  if (!audioContextRef.current) {
+    audioContextRef.current = new AudioContextClass()
+  }
+
+  const audioContext = audioContextRef.current
+
+  if (audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
+
+  const startTime = audioContext.currentTime + delay
+  const endTime = startTime + duration
+
+  const oscillator = audioContext.createOscillator()
+  const gain = audioContext.createGain()
+
+  oscillator.type = type
+  oscillator.frequency.setValueAtTime(frequency, startTime)
+  oscillator.frequency.exponentialRampToValueAtTime(
+    endFrequency,
+    endTime
+  )
+
+  gain.gain.setValueAtTime(0.0001, startTime)
+  gain.gain.exponentialRampToValueAtTime(
+    volume,
+    startTime + 0.01
+  )
+  gain.gain.exponentialRampToValueAtTime(0.0001, endTime)
+
+  oscillator.connect(gain)
+  gain.connect(audioContext.destination)
+
+  oscillator.start(startTime)
+  oscillator.stop(endTime)
+}
+
+function playGameSound(sound) {
+  if (sound === 'cast') {
+    playTone({
+      frequency: 500,
+      endFrequency: 130,
+      duration: 0.22,
+      type: 'triangle',
+      volume: 0.06,
+    })
+  }
+
+  if (sound === 'bite') {
+    playTone({
+      frequency: 750,
+      endFrequency: 950,
+      duration: 0.1,
+      type: 'square',
+      volume: 0.05,
+    })
+
+    playTone({
+      frequency: 950,
+      endFrequency: 1150,
+      duration: 0.1,
+      type: 'square',
+      volume: 0.05,
+      delay: 0.12,
+    })
+  }
+
+  if (sound === 'catch') {
+    playTone({
+      frequency: 420,
+      endFrequency: 650,
+      duration: 0.18,
+      type: 'triangle',
+      volume: 0.07,
+    })
+
+    playTone({
+      frequency: 650,
+      endFrequency: 900,
+      duration: 0.2,
+      type: 'triangle',
+      volume: 0.07,
+      delay: 0.16,
+    })
+  }
+
+  if (sound === 'trophy') {
+    playTone({
+      frequency: 520,
+      endFrequency: 520,
+      duration: 0.22,
+      type: 'triangle',
+      volume: 0.08,
+    })
+
+    playTone({
+      frequency: 660,
+      endFrequency: 660,
+      duration: 0.22,
+      type: 'triangle',
+      volume: 0.08,
+      delay: 0.14,
+    })
+
+    playTone({
+      frequency: 880,
+      endFrequency: 1100,
+      duration: 0.4,
+      type: 'triangle',
+      volume: 0.09,
+      delay: 0.28,
+    })
+  }
+}
   const [catchResult, setCatchResult] = useState(null)
 
 const [isFishing, setIsFishing] = useState(false)
@@ -447,10 +585,20 @@ const completedCatch = {
           <a href="#features">Features</a>
         </div>
 
-        <button className="kick-button" type="button">
-          Connect Kick
-        </button>
-      </nav>
+        <div className="nav-actions">
+  <button
+    className="sound-button"
+    type="button"
+    onClick={() => setSoundEnabled((current) => !current)}
+    aria-pressed={soundEnabled}
+  >
+    {soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}
+  </button>
+
+  <button className="kick-button" type="button">
+    Connect Kick
+  </button>
+</div>
 
       <section className="hero" id="game">
         <div className="hero-copy">

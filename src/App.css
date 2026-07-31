@@ -1301,3 +1301,38 @@ footer p {
     transform: scale(1) rotate(0);
   }
 }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.sound-button {
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.sound-button:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 700px) {
+  .nav-actions {
+    gap: 0.35rem;
+  }
+
+  .sound-button {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
