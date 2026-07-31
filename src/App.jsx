@@ -444,11 +444,24 @@ const completedCatch = {
 
   <p>You caught a</p>
 
-  {catchResult.isTrophy && (
-    <div className="trophy-banner">
-      ⭐ TROPHY CATCH! ⭐
+ {catchResult.isTrophy && (
+  <div
+    className="trophy-banner new-record-banner"
+    key={`${catchResult.name}-${catchResult.weight}`}
+  >
+    <span className="trophy-star">★</span>
+
+    <div className="trophy-message">
+      <span className="trophy-title">NEW RECORD!</span>
+
+      <span className="trophy-details">
+        {catchResult.name} • {catchResult.weight} lb
+      </span>
     </div>
-  )}
+
+    <span className="trophy-star">★</span>
+  </div>
+)}
 
   <h2>{catchResult.name}</h2>
 
@@ -548,19 +561,28 @@ const completedCatch = {
       const record = player.speciesRecords?.[fish.name]
 
       return (
-        <div className="record-card" key={fish.name}>
+        <div
+  className={`record-card ${record ? 'has-record' : 'not-caught'}`}
+  key={fish.name}
+>
           <div className="record-fish">
             <span className="record-icon">{fish.icon}</span>
 
             <div>
               <h3>{fish.name}</h3>
-              <p>{fish.rarity}</p>
+              <p className={`record-rarity rarity-${fish.rarity.toLowerCase()}`}>
+  {fish.rarity}
+</p>
             </div>
           </div>
 
-          <strong className="record-weight">
-            {record ? `${record.weight} lb` : 'Not caught'}
-          </strong>
+          <div className="record-result">
+  {record && <span className="record-label">Personal Best</span>}
+
+  <strong className="record-weight">
+    {record ? `${record.weight} lb` : 'Not caught'}
+  </strong>
+</div>
         </div>
       )
     })}

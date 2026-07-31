@@ -1140,3 +1140,164 @@ footer p {
   font-size: 1.2rem;
   color: #ffd54a;
 }
+.record-card.has-record {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.12),
+    inset 0 0 12px rgba(255, 215, 0, 0.05);
+}
+
+.record-card.not-caught {
+  opacity: 0.55;
+}
+
+.record-result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.record-label {
+  color: #ffd86b;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.record-rarity {
+  margin: 0;
+  font-weight: 700;
+}
+
+.rarity-common {
+  color: #cbd5e1;
+}
+
+.rarity-uncommon {
+  color: #62d98b;
+}
+
+.rarity-rare {
+  color: #5ca9ff;
+}
+
+.rarity-epic {
+  color: #c084fc;
+}
+
+.rarity-legendary {
+  color: #ffd84d;
+}
+
+.rarity-mythical {
+  color: #ff6b9d;
+}
+.new-record-banner {
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+
+  animation:
+    trophyEntrance 0.55s cubic-bezier(0.2, 1.4, 0.4, 1),
+    trophyPulse 0.75s ease-in-out 0.55s 2 alternate;
+}
+
+.new-record-banner::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -80%;
+
+  width: 45%;
+  height: 200%;
+
+  background: rgba(255, 255, 255, 0.55);
+  transform: rotate(20deg);
+
+  animation: trophyShine 1.2s ease-out 0.3s;
+}
+
+.trophy-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.trophy-title {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.trophy-details {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.trophy-star {
+  display: inline-block;
+  font-size: 1.25rem;
+  animation: trophyStarPop 0.65s ease-out;
+}
+
+@keyframes trophyEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-25px) scale(0.65);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes trophyPulse {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes trophyShine {
+  from {
+    left: -80%;
+  }
+
+  to {
+    left: 140%;
+  }
+}
+
+@keyframes trophyStarPop {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.35) rotate(15deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
