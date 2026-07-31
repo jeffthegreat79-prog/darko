@@ -220,15 +220,40 @@ function equipBait(bait) {
     bait: bait.name,
   }))
 }
-function getRandomFish() {
-  const roll = Math.random() * 100
-  let runningTotal = 0
+function getRandomFish(rareBonus = 0) {
+  const rarityBoostLevel = {
+    Common: 0,
+    Uncommon: 1,
+    Rare: 2,
+    Epic: 3,
+    Legendary: 4,
+    Mythical: 5,
+  }
 
-  for (const fish of fishTable) {
-    runningTotal += fish.chance
+  const weightedFish = fishTable.map((fish) => {
+    const boostLevel = rarityBoostLevel[fish.rarity] ?? 0
 
-    if (roll <= runningTotal) {
-      return fish
+    const multiplier =
+      1 + (rareBonus * boostLevel) / 100
+
+    return {
+      fish,
+      adjustedChance: fish.chance * multiplier,
+    }
+  })
+
+  const totalChance = weightedFish.reduce(
+    (total, entry) => total + entry.adjustedChance,
+    0
+  )
+
+  let roll = Math.random() * totalChance
+
+  for (const entry of weightedFish) {
+    roll -= entry.adjustedChance
+
+    if (roll <= 0) {
+      return entry.fish
     }
   }
 
@@ -251,7 +276,13 @@ function castLine() {
     }, 1800)
 
     setTimeout(() => {
-      const caughtFish = getRandomFish()
+      const equippedBait = baits.find(
+  (bait) => bait.name === player.bait
+)
+
+const rareBonus = equippedBait?.rareBonus ?? 0
+
+const caughtFish = getRandomFish(rareBonus)
 
 const equippedRod = rods.find((rod) => rod.name === player.rod)
 
