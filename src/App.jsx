@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
-
+import { playSound } from './soundEffects'
 const fishTable = [
   {
   name: 'Bluegill',
@@ -415,7 +415,11 @@ function getRandomFish(rareBonus = 0) {
 }
 
 function castLine() {
-    if (isFishing) return
+  if (isFishing) return
+
+  playSound('cast')
+
+  setIsFishing(true)
       const equippedBaitName = player.bait
 
   const baitQuantity = equippedBaitName
@@ -464,8 +468,9 @@ function castLine() {
     }, 600)
 
     setTimeout(() => {
-      setFishingPhase('bite')
-    }, 1800)
+  setFishingPhase('bite')
+  playSound('bite')
+}, 1800)
 
     setTimeout(() => {
       const equippedBait = baits.find(
@@ -475,6 +480,8 @@ function castLine() {
 const rareBonus = equippedBait?.rareBonus ?? 0
 
 const caughtFish = getRandomFish(rareBonus)
+
+playSound('catch')
 
 const equippedRod = rods.find((rod) => rod.name === player.rod)
 
@@ -578,7 +585,7 @@ const completedCatch = {
         <a className="brand" href="/">
           DARKO<span>.WTF</span>
         </a>
-
+</nav>
         <div className="nav-links">
           <a href="#game">Game</a>
           <a href="#inventory">Inventory</a>
