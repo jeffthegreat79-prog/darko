@@ -1,3 +1,15 @@
+const SOUND_SETTING_KEY = 'darko-sound-enabled'
+
+let soundEnabled = localStorage.getItem(SOUND_SETTING_KEY) !== 'false'
+
+export function isSoundEnabled() {
+  return soundEnabled
+}
+
+export function setSoundEnabled(enabled) {
+  soundEnabled = enabled
+  localStorage.setItem(SOUND_SETTING_KEY, String(enabled))
+}
 let audioContext = null
 
 function getAudioContext() {
@@ -57,6 +69,7 @@ function playTone(
 }
 
 export function playSound(soundName) {
+  if (!soundEnabled) return
   try {
     const context = getAudioContext()
 

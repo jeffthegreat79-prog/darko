@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
-import { playSound } from './soundEffects'
+import {
+  playSound,
+  isSoundEnabled,
+  setSoundEnabled,
+} from './soundEffects'
 const fishTable = [
   {
   name: 'Bluegill',
@@ -170,15 +174,11 @@ function App() {
       return defaultPlayer
     }
   })
-const [soundEnabled, setSoundEnabled] = useState(() => {
-  return localStorage.getItem('darko-sound') !== 'off'
-})
+const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
+
 useEffect(() => {
-  localStorage.setItem(
-    'darko-sound',
-    soundEnabled ? 'on' : 'off'
-  )
-}, [soundEnabled])
+  setSoundEnabled(soundOn)
+}, [soundOn])
 const audioContextRef = useRef(null)
 function playTone({
   frequency = 440,
@@ -188,7 +188,7 @@ function playTone({
   volume = 0.08,
   delay = 0,
 }) {
-  if (!soundEnabled) return
+  if (!soundOn) return
 
   const AudioContextClass =
     window.AudioContext || window.webkitAudioContext
@@ -594,17 +594,17 @@ const completedCatch = {
 
         <div className="nav-actions">
   <button
-    className="sound-button"
-    type="button"
-    onClick={() => setSoundEnabled((current) => !current)}
-    aria-pressed={soundEnabled}
-  >
-    {soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}
-  </button>
+  className="sound-button"
+  type="button"
+  onClick={() => setSoundOn((current) => !current)}
+  aria-pressed={soundOn}
+>
+  {soundOn ? '🔊 Sound On' : '🔇 Sound Off'}
+</button>
 
-  <button className="kick-button" type="button">
-    Connect Kick
-  </button>
+<button className="kick-button" type="button">
+  Connect Kick
+</button>
 </div>
 
       <section className="hero" id="game">
