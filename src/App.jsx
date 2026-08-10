@@ -316,7 +316,8 @@ const [isFishing, setIsFishing] = useState(false)
 const [fishingPhase, setFishingPhase] = useState('idle')
 
 const [shopOpen, setShopOpen] = useState(false)
-
+const lastKickCommandId = useRef(null)
+const castLineRef = useRef(null)
   useEffect(() => {
     localStorage.setItem('darko-player', JSON.stringify(player))
   }, [player])
@@ -561,7 +562,55 @@ const completedCatch = {
       setIsFishing(false)
     }, 2600)
   }
+useEffect(() => {
+  castLineRef.current = castLine
+})
+useEffect(() => {
+  let initialized = false
 
+  async function checkKickCommand() {
+    try {
+      const response = await fetch('/api/fish/latest', {
+        cache: 'no-store',
+      })
+
+      if (!response.ok) return
+
+      const latest = await response.json()
+
+      // On page load, remember the newest command without triggering it.
+      if (!initialized) {
+        lastKickCommandId.current = latest?.id ?? null
+        initialized = true
+        return
+      }
+
+      // Only react when a NEW command appears.
+      if (
+        latest?.id &&
+        latest.id !== lastKickCommandId.current
+      ) {
+        lastKickCommandId.current = latest.id
+
+        if (latest.command === '!fish') {
+          console.log(
+            `🎣 Kick cast triggered by ${latest.username}`
+          )
+
+          castLineRef.current?.()
+        }
+      }
+    } catch (error) {
+      console.error('Kick command check failed:', error)
+    }
+  }
+
+  checkKickCommand()
+
+  const interval = setInterval(checkKickCommand, 1500)
+
+  return () => clearInterval(interval)
+}, [])
   function resetProgress() {
     const confirmed = window.confirm(
       'Reset all coins, catches, and inventory?',
