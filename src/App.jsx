@@ -415,7 +415,7 @@ function getRandomFish(rareBonus = 0) {
   return fishTable[0]
 }
 
-function castLine() {
+function castLine(kickUsername = null) {
   if (isFishing) return
 
   playSound('cast')
@@ -522,6 +522,7 @@ const completedCatch = {
   value: reward,
   isTrophy,
   caughtAt: new Date().toISOString(),
+  username: typeof kickUsername === 'string' ? kickUsername : null,
 }
 
       setCatchResult(completedCatch)
@@ -597,7 +598,7 @@ useEffect(() => {
             `🎣 Kick cast triggered by ${latest.username}`
           )
 
-          castLineRef.current?.()
+          castLineRef.current?.(latest.username)
         }
       }
     } catch (error) {
@@ -751,7 +752,11 @@ useEffect(() => {
     <span className="trophy-star">★</span>
   </div>
 )}
-
+{catchResult.username && (
+  <p className="kick-catcher">
+    🎣 {catchResult.username} caught:
+  </p>
+)}
   <h2>{catchResult.name}</h2>
 
   <span
