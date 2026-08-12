@@ -24,7 +24,13 @@ export async function onRequestPost(context) {
         `)
         .bind(kickMessageId, username, message)
         .run()
-
+await env.FISH_DB
+  .prepare(`
+    INSERT OR IGNORE INTO players (username)
+    VALUES (?)
+  `)
+  .bind(username)
+  .run()
       console.log(`🎣 Saved !fish command for ${username}`)
     }
 
