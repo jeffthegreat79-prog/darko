@@ -527,7 +527,28 @@ const completedCatch = {
 
       setCatchResult(completedCatch)
       setFishingPhase('caught')
-
+if (completedCatch.username) {
+  fetch('/api/fish/catch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      username: completedCatch.username,
+      species: completedCatch.name,
+      weight: completedCatch.weight,
+      coins: completedCatch.value,
+    }),
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+    })
+    .catch((error) => {
+      console.error('Failed to save Kick catch:', error)
+    })
+}
       setPlayer((currentPlayer) => {
   const isBiggestCatch =
     !currentPlayer.biggestCatch ||
