@@ -310,7 +310,7 @@ function playGameSound(sound) {
   }
 }
   const [catchResult, setCatchResult] = useState(null)
-
+const [kickPlayerStats, setKickPlayerStats] = useState(null)
 const [isFishing, setIsFishing] = useState(false)
 
 const [fishingPhase, setFishingPhase] = useState('idle')
@@ -614,24 +614,46 @@ useEffect(() => {
       ) {
         lastKickCommandId.current = latest.id
 
-        if (latest.command === '!fish') {
-          console.log(
-            `🎣 Kick cast triggered by ${latest.username}`
-          )
+       if (latest.command === '!fish') {
+  console.log(
+    `🎣 Kick cast triggered by ${latest.username}`
+  )
 
-          castLineRef.current?.(latest.username)
-        }
+  try {
+    const playerResponse = await fetch(
+      `/api/player?username=${encodeURIComponent(latest.username)}`,
+      {
+        cache: 'no-store',
+      }
+    )
+
+    if (playerResponse.ok) {
+      const playerData = await playerResponse.json()
+
+      setKickPlayerStats(playerData.player)
+
+      console.log(
+        '🎣 Loaded Kick player stats:',
+        playerData.player
+      )
+    }
+  } catch (error) {
+    console.error('Failed to load Kick player stats:', error)
+  }
+
+   castLineRef.current?.(latest.username)
+}
       }
     } catch (error) {
       console.error('Kick command check failed:', error)
     }
   }
 
-  checkKickCommand()
+checkKickCommand()
 
-  const interval = setInterval(checkKickCommand, 1500)
+const interval = setInterval(checkKickCommand, 1500)
 
-  return () => clearInterval(interval)
+return () => clearInterval(interval)
 }, [])
   function resetProgress() {
     const confirmed = window.confirm(
@@ -712,7 +734,33 @@ useEffect(() => {
               </strong>
             </article>
           </div>
+{kickPlayerStats && (
+  <div className="player-summary kick-player-summary">
+    <article>
+      <span>Kick player</span>
+      <strong>🎣 {kickPlayerStats.username}</strong>
+    </article>
 
+    <article>
+      <span>Coins</span>
+      <strong>🪙 {kickPlayerStats.coins.toLocaleString()}</strong>
+    </article>
+
+    <article>
+      <span>Total catches</span>
+      <strong>{kickPlayerStats.catches}</strong>
+    </article>
+
+    <article>
+      <span>Biggest catch</span>
+      <strong>
+        {kickPlayerStats.biggest_weight > 0
+          ? `${kickPlayerStats.biggest_species} — ${kickPlayerStats.biggest_weight} lb`
+          : 'No catches yet'}
+      </strong>
+    </article>
+  </div>
+)}
           <div className="hero-actions">
             <button
               className="primary-button"
