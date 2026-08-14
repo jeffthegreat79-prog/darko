@@ -540,15 +540,28 @@ if (completedCatch.username) {
       coins: completedCatch.value,
     }),
   })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(await response.text())
-      }
-    })
-    .catch((error) => {
-      console.error('Failed to save Kick catch:', error)
-    })
+   .then(async (response) => {
+  if (!response.ok) {
+    throw new Error(await response.text())
+  }
+
+  const playerResponse = await fetch(
+    `/api/player?username=${encodeURIComponent(completedCatch.username)}`,
+    { cache: 'no-store' }
+  )
+
+  if (!playerResponse.ok) {
+    throw new Error(await playerResponse.text())
+  }
+
+  const playerData = await playerResponse.json()
+  setKickPlayerStats(playerData.player)
+})
+.catch((error) => {
+  console.error('Failed to save or refresh Kick catch:', error)
+})
 }
+if (!completedCatch.username) {
       setPlayer((currentPlayer) => {
   const isBiggestCatch =
     !currentPlayer.biggestCatch ||
@@ -580,6 +593,7 @@ if (completedCatch.username) {
     speciesRecords: updatedSpeciesRecords,
   }
 })
+}
 
       setIsFishing(false)
     }, 2600)
@@ -717,21 +731,23 @@ return () => clearInterval(interval)
           <div className="player-summary">
             <article>
               <span>Coins</span>
-              <strong>🪙 {player.coins.toLocaleString()}</strong>
+              <strong>🪙 {(kickPlayerStats?.coins ?? player.coins).toLocaleString()}</strong>
             </article>
 
             <article>
               <span>Total catches</span>
-              <strong>{player.catches}</strong>
+              <strong>{kickPlayerStats?.catches ?? player.catches}</strong>
             </article>
 
             <article>
               <span>Biggest catch</span>
               <strong>
-                {player.biggestCatch
-                  ? `${player.biggestCatch.weight} lb`
-                  : 'None yet'}
-              </strong>
+  {kickPlayerStats?.biggest_weight
+    ? `${kickPlayerStats.biggest_species} — ${kickPlayerStats.biggest_weight} lb`
+    : player.biggestCatch
+      ? `${player.biggestCatch.weight} lb`
+      : 'None yet'}
+</strong>
             </article>
           </div>
 {kickPlayerStats && (
