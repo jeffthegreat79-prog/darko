@@ -719,8 +719,9 @@ return () => clearInterval(interval)
           <p className="eyebrow">Interactive stream fishing</p>
 
           <h1>
-            Cast. Catch.
-            <span> Conquer the deep.</span>
+            Rippin Lips 
+            and
+            <span> Eatin chips.</span>
           </h1>
 
           <p className="hero-description">
