@@ -28,11 +28,37 @@ export async function onRequestGet({ request, env }) {
         status: 404,
       })
     }
+const [itemsResult, loadout] = await Promise.all([
+  env.FISH_DB
+    .prepare(`
+      SELECT item_type, item_name, quantity
+      FROM player_items
+      WHERE LOWER(username) = LOWER(?)
+      ORDER BY item_type, item_name
+    `)
+    .bind(player.username)
+    .all(),
 
+  env.FISH_DB
+    .prepare(`
+      SELECT equipped_rod, equipped_bait
+      FROM player_loadout
+      WHERE LOWER(username) = LOWER(?)
+    `)
+    .bind(player.username)
+    .first(),
+])
     return Response.json({
-      success: true,
-      player,
-    })
+  success: true,
+  player: {
+    ...player,
+    items: itemsResult.results ?? [],
+    loadout: loadout ?? {
+      equipped_rod: null,
+      equipped_bait: null,
+    },
+  },
+})
   } catch (error) {
     console.error('Player lookup error:', error)
 
