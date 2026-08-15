@@ -1149,7 +1149,7 @@ return () => clearInterval(interval)
        
 
                 {shopOpen && (
-          <div className="feature-card" style={{ marginTop: '2rem' }}>
+         <div className="feature-card fishing-shop" style={{ marginTop: '2rem' }}>
             <h3>🎣 Fishing Shop</h3>
 
             <h4>Fishing Rods</h4>
@@ -1167,29 +1167,38 @@ return () => clearInterval(interval)
     ? kickPlayerStats.loadout?.equipped_rod === rod.name
     : player.rod === rod.name
 
-  return (
-    <div key={rod.name} style={{ marginBottom: '1rem' }}>
-      <strong>{rod.name}</strong> — {rod.cost} coins
+ return (
+  <div key={rod.name} className="shop-item rod-shop-item">
+    <div className="shop-item-main">
+      <div className="shop-item-info">
+        <div className="shop-item-title">
+          <span>🎣</span>
+          <strong>{rod.name}</strong>
+        </div>
 
-      {isEquipped ? (
-        <span> (Equipped)</span>
-      ) : isOwned ? (
-        <button
-          style={{ marginLeft: '1rem' }}
-          onClick={() => equipRod(rod)}
-        >
-          Equip
-        </button>
-      ) : (
-        <button
-          style={{ marginLeft: '1rem' }}
-          onClick={() => buyRod(rod)}
-        >
-          Buy
-        </button>
-      )}
+        <div className="shop-item-price">
+          {rod.cost === 0 ? 'Free' : `${rod.cost} coins`}
+        </div>
+      </div>
+
+      <div className="shop-item-actions">
+        {isEquipped ? (
+          <span className="equipped-badge">
+            ✓ Equipped
+          </span>
+        ) : isOwned ? (
+          <button onClick={() => equipRod(rod)}>
+            Equip
+          </button>
+        ) : (
+          <button onClick={() => buyRod(rod)}>
+            {rod.cost === 0 ? 'Claim' : 'Buy'}
+          </button>
+        )}
+      </div>
     </div>
-  )
+  </div>
+)
 })}
             <h4 style={{ marginTop: '2rem' }}>🪱 Bait Shop</h4>
 
@@ -1206,40 +1215,42 @@ const isEquipped = kickPlayerStats?.username
   ? kickPlayerStats.loadout?.equipped_bait === bait.name
   : player.bait === bait.name
   return (
-    <div
-      key={bait.name}
-      style={{ marginBottom: '1rem' }}
-    >
-      <strong>
-        {bait.icon} {bait.name}
-      </strong>
-
-      <div>
-        {bait.cost} coins — 5 pieces
-      </div>
-
-      <div>
-        Quantity: <strong>{quantity}</strong>
-      </div>
-
-      {isEquipped ? (
-        <span>Equipped</span>
-      ) : quantity > 0 ? (
-        <button
-          style={{ marginLeft: '1rem' }}
-          onClick={() => equipBait(bait)}
-        >
-          Equip
-        </button>
-      ) : null}
-
-      <button
-        style={{ marginLeft: '1rem' }}
-        onClick={() => buyBait(bait)}
-      >
-        Buy 5
-      </button>
+  
+    <div key={bait.name} className="shop-item bait-shop-item">
+     <div className="shop-item-main">
+  <div className="shop-item-info">
+    <div className="shop-item-title">
+      <span>{bait.icon}</span>
+      <strong>{bait.name}</strong>
     </div>
+
+    <div className="shop-item-price">
+      {bait.cost} coins
+      <span> • 5 pieces</span>
+    </div>
+  </div>
+
+  <div className="shop-item-actions">
+    <span className="quantity-pill">
+      Qty {quantity}
+    </span>
+
+    {isEquipped ? (
+      <span className="equipped-badge">
+        ✓ Equipped
+      </span>
+    ) : quantity > 0 ? (
+      <button onClick={() => equipBait(bait)}>
+        Equip
+      </button>
+    ) : null}
+
+    <button onClick={() => buyBait(bait)}>
+      Buy 5
+       </button>
+  </div>
+</div>
+</div>
   )
 })}
                     </div>
