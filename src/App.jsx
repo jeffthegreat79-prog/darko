@@ -321,14 +321,100 @@ const castLineRef = useRef(null)
   useEffect(() => {
     localStorage.setItem('darko-player', JSON.stringify(player))
   }, [player])
-function buyRod(rod) {
+async function buyRod(rod) {
+  if (kickPlayerStats?.username) {
+    try {
+      const response = await fetch('/api/shop/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: kickPlayerStats.username,
+          itemType: 'rod',
+          itemName: rod.name,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to buy rod')
+        return
+      }
+
+      const playerResponse = await fetch(
+        `/api/player?username=${encodeURIComponent(kickPlayerStats.username)}`,
+        { cache: 'no-store' }
+      )
+
+      const playerData = await playerResponse.json()
+
+      if (playerResponse.ok) {
+        setKickPlayerStats(playerData.player)
+      }
+
+      return
+    } catch (error) {
+      console.error('Failed to buy rod:', error)
+      alert('Failed to buy rod')
+      return
+    }
+  }
+
+  // Local/manual player fallback
   if (player.coins < rod.cost) return
 
   if ((player.ownedRods ?? []).includes(rod.name)) return
 
-  
+  setPlayer((current) => ({
+    ...current,
+    coins: current.coins - rod.cost,
+    ownedRods: [...(current.ownedRods ?? []), rod.name],
+  }))
 }
-function equipRod(rod) {
+async function equipRod(rod) {
+  if (kickPlayerStats?.username) {
+    try {
+      const response = await fetch('/api/shop/equip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: kickPlayerStats.username,
+          itemType: 'rod',
+          itemName: rod.name,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to equip rod')
+        return
+      }
+
+      const playerResponse = await fetch(
+        `/api/player?username=${encodeURIComponent(kickPlayerStats.username)}`,
+        { cache: 'no-store' }
+      )
+
+      const playerData = await playerResponse.json()
+
+      if (playerResponse.ok) {
+        setKickPlayerStats(playerData.player)
+      }
+
+      return
+    } catch (error) {
+      console.error('Failed to equip rod:', error)
+      alert('Failed to equip rod')
+      return
+    }
+  }
+
+  // Local/manual player fallback
   if (!(player.ownedRods ?? []).includes(rod.name)) return
 
   setPlayer((current) => ({
@@ -336,21 +422,59 @@ function equipRod(rod) {
     rod: rod.name,
   }))
 }
-function buyBait(bait) {
+async function buyBait(bait) {
+  if (kickPlayerStats?.username) {
+    try {
+      const response = await fetch('/api/shop/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: kickPlayerStats.username,
+          itemType: 'bait',
+          itemName: bait.name,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to buy bait')
+        return
+      }
+
+      const playerResponse = await fetch(
+        `/api/player?username=${encodeURIComponent(kickPlayerStats.username)}`,
+        { cache: 'no-store' }
+      )
+
+      const playerData = await playerResponse.json()
+
+      if (playerResponse.ok) {
+        setKickPlayerStats(playerData.player)
+      }
+
+      return
+    } catch (error) {
+      console.error('Failed to buy bait:', error)
+      alert('Failed to buy bait')
+      return
+    }
+  }
+
+  // Local/manual player fallback
   if (player.coins < bait.cost) {
-    alert("You do not have enough coins!")
+    alert('You do not have enough coins!')
     return
   }
 
   setPlayer((current) => {
     const alreadyOwned = (current.ownedBaits ?? []).includes(bait.name)
-
-    const currentQuantity =
-      current.baitCounts?.[bait.name] ?? 0
+    const currentQuantity = current.baitCounts?.[bait.name] ?? 0
 
     return {
       ...current,
-
       coins: current.coins - bait.cost,
 
       ownedBaits: alreadyOwned
@@ -365,7 +489,48 @@ function buyBait(bait) {
   })
 }
 
-function equipBait(bait) {
+async function equipBait(bait) {
+  if (kickPlayerStats?.username) {
+    try {
+      const response = await fetch('/api/shop/equip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: kickPlayerStats.username,
+          itemType: 'bait',
+          itemName: bait.name,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to equip bait')
+        return
+      }
+
+      const playerResponse = await fetch(
+        `/api/player?username=${encodeURIComponent(kickPlayerStats.username)}`,
+        { cache: 'no-store' }
+      )
+
+      const playerData = await playerResponse.json()
+
+      if (playerResponse.ok) {
+        setKickPlayerStats(playerData.player)
+      }
+
+      return
+    } catch (error) {
+      console.error('Failed to equip bait:', error)
+      alert('Failed to equip bait')
+      return
+    }
+  }
+
+  // Local/manual player fallback
   const quantity = player.baitCounts?.[bait.name] ?? 0
 
   if (quantity <= 0) return
@@ -752,30 +917,8 @@ return () => clearInterval(interval)
             </article>
           </div>
 {kickPlayerStats && (
-  <div className="player-summary kick-player-summary">
-    <article>
-      <span>Kick player</span>
-      <strong>🎣 {kickPlayerStats.username}</strong>
-    </article>
-
-    <article>
-      <span>Coins</span>
-      <strong>🪙 {kickPlayerStats.coins.toLocaleString()}</strong>
-    </article>
-
-    <article>
-      <span>Total catches</span>
-      <strong>{kickPlayerStats.catches}</strong>
-    </article>
-
-    <article>
-      <span>Biggest catch</span>
-      <strong>
-        {kickPlayerStats.biggest_weight > 0
-          ? `${kickPlayerStats.biggest_species} — ${kickPlayerStats.biggest_weight} lb`
-          : 'No catches yet'}
-      </strong>
-    </article>
+  <div className="kick-player-badge">
+    🎣 Fishing as <strong>{kickPlayerStats.username}</strong>
   </div>
 )}
           <div className="hero-actions">
