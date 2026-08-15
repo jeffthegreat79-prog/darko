@@ -1154,36 +1154,57 @@ return () => clearInterval(interval)
 
             <h4>Fishing Rods</h4>
 
-            {rods.map((rod) => (
-              <div key={rod.name} style={{ marginBottom: '1rem' }}>
-                <strong>{rod.name}</strong> - {rod.cost} coins
+            {rods.map((rod) => {
+  const kickRodItem = kickPlayerStats?.items?.find(
+    (item) => item.item_type === 'rod' && item.item_name === rod.name
+  )
 
-                {player.rod === rod.name ? (
-                  <span> (Equipped)</span>
-                ) : player.ownedRods.includes(rod.name) ? (
-                  <button
-                    style={{ marginLeft: '1rem' }}
-                    onClick={() => equipRod(rod)}
-                  >
-                    Equip
-                  </button>
-                ) : (
-                  <button
-                    style={{ marginLeft: '1rem' }}
-                    onClick={() => buyRod(rod)}
-                  >
-                    Buy
-                  </button>
-                )}
-              </div>
-            ))}
+  const isOwned = kickPlayerStats?.username
+    ? Boolean(kickRodItem)
+    : (player.ownedRods ?? []).includes(rod.name)
 
+  const isEquipped = kickPlayerStats?.username
+    ? kickPlayerStats.loadout?.equipped_rod === rod.name
+    : player.rod === rod.name
+
+  return (
+    <div key={rod.name} style={{ marginBottom: '1rem' }}>
+      <strong>{rod.name}</strong> — {rod.cost} coins
+
+      {isEquipped ? (
+        <span> (Equipped)</span>
+      ) : isOwned ? (
+        <button
+          style={{ marginLeft: '1rem' }}
+          onClick={() => equipRod(rod)}
+        >
+          Equip
+        </button>
+      ) : (
+        <button
+          style={{ marginLeft: '1rem' }}
+          onClick={() => buyRod(rod)}
+        >
+          Buy
+        </button>
+      )}
+    </div>
+  )
+})}
             <h4 style={{ marginTop: '2rem' }}>🪱 Bait Shop</h4>
 
             {baits.map((bait) => {
-  const quantity = player.baitCounts?.[bait.name] ?? 0
-  const isEquipped = player.bait === bait.name
+ const kickBaitItem = kickPlayerStats?.items?.find(
+  (item) => item.item_type === 'bait' && item.item_name === bait.name
+)
 
+const quantity = kickPlayerStats?.username
+  ? kickBaitItem?.quantity ?? 0
+  : player.baitCounts?.[bait.name] ?? 0
+
+const isEquipped = kickPlayerStats?.username
+  ? kickPlayerStats.loadout?.equipped_bait === bait.name
+  : player.bait === bait.name
   return (
     <div
       key={bait.name}
