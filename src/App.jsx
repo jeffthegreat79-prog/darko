@@ -87,6 +87,15 @@ const fishTable = [
     maxWeight: 2.5,
     icon: '🐉',
   },
+  {
+  name: 'Baby shark',
+  rarity: 'rare',
+  value: 40,
+  chance: 6,
+  minWeight: .5,
+  maxWeight: 5.0,
+  icon: '🦈',
+}
 ];
 const rods = [
   {
