@@ -43,7 +43,7 @@ export async function onRequestGet(context) {
     client_id: env.KICK_CLIENT_ID,
     response_type: 'code',
     redirect_uri: redirectUri,
-    scope: 'user:read events:subscribe',
+   scope: 'user:read events:subscribe chat:write',
     state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',
