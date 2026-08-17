@@ -86,7 +86,37 @@ export async function onRequestGet(context) {
       }
     )
   }
+const expiresIn = Number(tokenData.expires_in)
+const expiresAt = Date.now() + expiresIn * 1000
 
+await env.FISH_DB
+  .prepare(`
+    INSERT INTO kick_auth (
+      id,
+      access_token,
+      refresh_token,
+      expires_at,
+      scope,
+      updated_at
+    )
+    VALUES (1, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+
+    ON CONFLICT(id) DO UPDATE SET
+      access_token = excluded.access_token,
+      refresh_token = excluded.refresh_token,
+      expires_at = excluded.expires_at,
+      scope = excluded.scope,
+      updated_at = CURRENT_TIMESTAMP
+  `)
+  .bind(
+    tokenData.access_token,
+    tokenData.refresh_token,
+    expiresAt,
+    tokenData.scope || ''
+  )
+  .run()
+
+console.log('Kick OAuth tokens saved to D1')
   const subscriptionResponse = await fetch(
     'https://api.kick.com/public/v1/events/subscriptions',
     {
