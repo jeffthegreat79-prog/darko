@@ -17,16 +17,35 @@ async function sendKickChatMessage(env, content) {
       console.warn('Kick access token has expired')
       return
     }
+const userResponse = await fetch('https://api.kick.com/public/v1/users', {
+  headers: {
+    Authorization: `Bearer ${auth.access_token}`,
+  },
+})
 
+const userData = await userResponse.json()
+
+if (!userResponse.ok) {
+  console.error('Could not get Kick user:', userData)
+  return
+}
+
+const broadcasterUserId = userData?.data?.[0]?.user_id
+
+if (!broadcasterUserId) {
+  console.error('No Kick broadcaster user ID found')
+  return
+}
     const response = await fetch('https://api.kick.com/public/v1/chat', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${auth.access_token}`,
         'Content-Type': 'application/json',
       },
-    body: JSON.stringify({
+   body: JSON.stringify({
   content,
-  type: 'bot',
+  type: 'user',
+  broadcaster_user_id: broadcasterUserId,
 }),
     })
 
