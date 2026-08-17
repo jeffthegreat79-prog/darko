@@ -24,10 +24,10 @@ async function sendKickChatMessage(env, content) {
         Authorization: `Bearer ${auth.access_token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        content,
-        type: 'user',
-      }),
+    body: JSON.stringify({
+  content,
+  type: 'bot',
+}),
     })
 
     if (!response.ok) {
