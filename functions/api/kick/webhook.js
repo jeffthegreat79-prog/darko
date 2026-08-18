@@ -47,6 +47,45 @@ export async function onRequestPost(context) {
     console.log('Kick chat message:', body.content)
 
     if (message === '!fish') {
+      const now = Math.floor(Date.now() / 1000)
+const cooldownSeconds = 5 * 60
+
+const lastFish = await env.FISH_DB
+  .prepare(`
+    SELECT created_at
+    FROM fish_commands
+    WHERE LOWER(username) = LOWER(?)
+      AND command = '!fish'
+    ORDER BY created_at DESC
+    LIMIT 1
+  `)
+  .bind(username)
+  .first()
+
+if (lastFish) {
+  const elapsedSeconds =
+    now - Number(lastFish.created_at)
+
+  if (elapsedSeconds < cooldownSeconds) {
+    const remainingSeconds =
+      cooldownSeconds - elapsedSeconds
+
+    const remainingMinutes =
+      Math.ceil(remainingSeconds / 60)
+
+    await sendKickChatMessage(
+      env,
+      `🎣 Nothing's biting at the moment, try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}`
+    )
+
+    return new Response('OK', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    })
+  }
+}
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
       await env.FISH_DB
@@ -75,7 +114,12 @@ if (message.toLowerCase().startsWith('!buybait ')) {
   const bait = BAITS[baitKey]
 
   if (!bait) {
-    console.log(`Unknown bait requested by ${username}: ${baitKey}`)
+  await sendKickChatMessage(
+    env,
+    `🎣 ${username}, bait options are: Worms, Minnows, Crickets, Golden Lures`
+  )
+
+  console.log(`Unknown bait requested by ${username}: ${baitKey}`)
   } else {
     // Make sure the player exists.
     await env.FISH_DB
@@ -97,10 +141,15 @@ if (message.toLowerCase().startsWith('!buybait ')) {
 
     if (!player) {
       console.error(`Could not find player ${username}`)
-    } else if (Number(player.coins) < bait.cost) {
-      console.log(
-        `${username} does not have enough coins for ${bait.name}`
-      )
+   } else if (Number(player.coins) < bait.cost) {
+  await sendKickChatMessage(
+    env,
+    `❌ ${username} doesn't have enough coins! ${bait.replyName} cost ${bait.cost} coins. Balance: ${player.coins} coins`
+  )
+
+  console.log(
+    `${username} does not have enough coins for ${bait.name}`
+  )
     } else {
       await env.FISH_DB.batch([
         env.FISH_DB
