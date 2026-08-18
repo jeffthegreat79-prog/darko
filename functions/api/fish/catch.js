@@ -1,4 +1,4 @@
-async function sendKickChatMessage(env, content) {
+export async function sendKickChatMessage(env, content) {
   try {
     const auth = await env.FISH_DB
       .prepare(`

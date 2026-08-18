@@ -1,3 +1,4 @@
+import { sendKickChatMessage } from '../fish/catch.js'
 const BAITS = {
   worm: { name: 'Worm', cost: 10 },
   minnow: { name: 'Minnow', cost: 40 },
@@ -5,6 +6,7 @@ const BAITS = {
   'golden lure': { name: 'Golden Lure', cost: 200 },
   goldenlure: { name: 'Golden Lure', cost: 200 },
 }
+
 export async function onRequestPost(context) {
   const { request, env } = context
 
@@ -105,7 +107,10 @@ if (message.toLowerCase().startsWith('!buybait ')) {
         `)
         .bind(player.username)
         .first()
-
+await sendKickChatMessage(
+  env,
+  `🪱 ${username} bought 5 ${bait.name} for ${bait.cost} coins! Balance: ${updatedPlayer?.coins} coins`
+)
       console.log(
         `🪱 ${username} bought 5 ${bait.name} for ${bait.cost} coins. Balance: ${updatedPlayer?.coins}`
       )
