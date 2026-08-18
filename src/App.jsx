@@ -801,7 +801,31 @@ useEffect(() => {
         latest.id !== lastKickCommandId.current
       ) {
         lastKickCommandId.current = latest.id
+const claimResponse = await fetch('/api/fish/claim', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    id: latest.id,
+  }),
+})
 
+if (!claimResponse.ok) {
+  console.error('Failed to claim fish command')
+  return
+}
+
+const claimData = await claimResponse.json()
+
+if (!claimData.claimed) {
+  console.log(
+    `Fish command ${latest.id} was already claimed by another client`
+  )
+  return
+}
+
+console.log(`Claimed fish command ${latest.id}`)
        if (latest.command === '!fish') {
   console.log(
     `🎣 Kick cast triggered by ${latest.username}`
