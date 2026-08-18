@@ -1,10 +1,34 @@
 import { sendKickChatMessage } from '../fish/catch.js'
 const BAITS = {
-  worm: { name: 'Worm', cost: 10 },
-  minnow: { name: 'Minnow', cost: 40 },
-  cricket: { name: 'Cricket', cost: 75 },
-  'golden lure': { name: 'Golden Lure', cost: 200 },
-  goldenlure: { name: 'Golden Lure', cost: 200 },
+  worm: { name: 'Worm', replyName: 'Worms', cost: 10 },
+  worms: { name: 'Worm', replyName: 'Worms', cost: 10 },
+
+  minnow: { name: 'Minnow', replyName: 'Minnows', cost: 40 },
+  minnows: { name: 'Minnow', replyName: 'Minnows', cost: 40 },
+
+  cricket: { name: 'Cricket', replyName: 'Crickets', cost: 75 },
+  crickets: { name: 'Cricket', replyName: 'Crickets', cost: 75 },
+
+  'golden lure': {
+    name: 'Golden Lure',
+    replyName: 'Golden Lures',
+    cost: 200,
+  },
+  'golden lures': {
+    name: 'Golden Lure',
+    replyName: 'Golden Lures',
+    cost: 200,
+  },
+  goldenlure: {
+    name: 'Golden Lure',
+    replyName: 'Golden Lures',
+    cost: 200,
+  },
+  goldenlures: {
+    name: 'Golden Lure',
+    replyName: 'Golden Lures',
+    cost: 200,
+  },
 }
 
 export async function onRequestPost(context) {
@@ -107,9 +131,19 @@ if (message.toLowerCase().startsWith('!buybait ')) {
         `)
         .bind(player.username)
         .first()
+        const updatedBait = await env.FISH_DB
+  .prepare(`
+    SELECT quantity
+    FROM player_items
+    WHERE username = ?
+      AND item_type = 'bait'
+      AND item_name = ?
+  `)
+  .bind(player.username, bait.name)
+  .first()
 await sendKickChatMessage(
   env,
-  `🪱 ${username} bought 5 ${bait.name} for ${bait.cost} coins! Balance: ${updatedPlayer?.coins} coins`
+  `🪱 ${username} bought 5 ${bait.replyName} for ${bait.cost} coins! Balance: ${updatedPlayer?.coins} coins | ${bait.replyName}: ${updatedBait?.quantity}`
 )
       console.log(
         `🪱 ${username} bought 5 ${bait.name} for ${bait.cost} coins. Balance: ${updatedPlayer?.coins}`
