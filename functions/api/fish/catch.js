@@ -2,7 +2,7 @@ async function sendKickChatMessage(env, content) {
   try {
     const auth = await env.FISH_DB
       .prepare(`
-        SELECT access_token, expires_at
+        SELECT access_token, refresh_token, expires_at
         FROM kick_auth
         WHERE id = 1
       `)
@@ -13,10 +13,67 @@ async function sendKickChatMessage(env, content) {
       return
     }
 
-    if (Number(auth.expires_at) <= Date.now()) {
-      console.warn('Kick access token has expired')
-      return
+   if (Number(auth.expires_at) <= Date.now() + 60_000) {
+  console.log('Kick access token expired or expiring soon; refreshing...')
+
+  if (!auth.refresh_token) {
+    console.warn('No Kick refresh token saved')
+    return
+  }
+
+  const refreshBody = new URLSearchParams({
+    grant_type: 'refresh_token',
+    client_id: env.KICK_CLIENT_ID,
+    client_secret: env.KICK_CLIENT_SECRET,
+    refresh_token: auth.refresh_token,
+  })
+
+  const refreshResponse = await fetch(
+    'https://id.kick.com/oauth/token',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: refreshBody,
     }
+  )
+
+  const refreshData = await refreshResponse.json()
+
+  if (!refreshResponse.ok || !refreshData.access_token) {
+    console.error('Kick token refresh failed:', refreshData)
+    return
+  }
+
+  const expiresAt =
+    Date.now() + Number(refreshData.expires_in) * 1000
+
+  const nextRefreshToken =
+    refreshData.refresh_token || auth.refresh_token
+
+  await env.FISH_DB
+    .prepare(`
+      UPDATE kick_auth
+      SET access_token = ?,
+          refresh_token = ?,
+          expires_at = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = 1
+    `)
+    .bind(
+      refreshData.access_token,
+      nextRefreshToken,
+      expiresAt
+    )
+    .run()
+
+  auth.access_token = refreshData.access_token
+  auth.refresh_token = nextRefreshToken
+  auth.expires_at = expiresAt
+
+  console.log('Kick access token refreshed')
+}
 const userResponse = await fetch('https://api.kick.com/public/v1/users', {
   headers: {
     Authorization: `Bearer ${auth.access_token}`,
