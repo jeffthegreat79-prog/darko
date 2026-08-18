@@ -200,6 +200,44 @@ await sendKickChatMessage(
     }
   }
 }
+if (message.toLowerCase() === '!gear') {
+  const loadout = await env.FISH_DB
+    .prepare(`
+      SELECT equipped_rod, equipped_bait
+      FROM player_loadout
+      WHERE LOWER(username) = LOWER(?)
+    `)
+    .bind(username)
+    .first()
+
+  const equippedRod =
+    loadout?.equipped_rod || 'None equipped'
+
+  const equippedBait =
+    loadout?.equipped_bait || 'None equipped'
+
+  let baitQuantity = 0
+
+  if (loadout?.equipped_bait) {
+    const baitItem = await env.FISH_DB
+      .prepare(`
+        SELECT quantity
+        FROM player_items
+        WHERE LOWER(username) = LOWER(?)
+          AND item_type = 'bait'
+          AND item_name = ?
+      `)
+      .bind(username, loadout.equipped_bait)
+      .first()
+
+    baitQuantity = Number(baitItem?.quantity) || 0
+  }
+
+  await sendKickChatMessage(
+    env,
+    `🎣 ${username}'s Gear | Rod: ${equippedRod} | Bait: ${equippedBait}${loadout?.equipped_bait ? ` (${baitQuantity} left)` : ''}`
+  )
+}
 if (message.toLowerCase() === '!balance') {
   await env.FISH_DB
     .prepare(`
