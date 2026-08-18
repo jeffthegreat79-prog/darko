@@ -200,6 +200,63 @@ await sendKickChatMessage(
     }
   }
 }
+if (message.toLowerCase() === '!balance') {
+  await env.FISH_DB
+    .prepare(`
+      INSERT OR IGNORE INTO players (username)
+      VALUES (?)
+    `)
+    .bind(username)
+    .run()
+
+  const player = await env.FISH_DB
+    .prepare(`
+      SELECT username, coins
+      FROM players
+      WHERE LOWER(username) = LOWER(?)
+    `)
+    .bind(username)
+    .first()
+
+  const baitResult = await env.FISH_DB
+    .prepare(`
+      SELECT item_name, quantity
+      FROM player_items
+      WHERE LOWER(username) = LOWER(?)
+        AND item_type = 'bait'
+    `)
+    .bind(username)
+    .all()
+
+  const baitCounts = {
+    Worm: 0,
+    Minnow: 0,
+    Cricket: 0,
+    'Golden Lure': 0,
+  }
+
+  for (const item of baitResult.results ?? []) {
+    if (
+      Object.prototype.hasOwnProperty.call(
+        baitCounts,
+        item.item_name
+      )
+    ) {
+      baitCounts[item.item_name] = Number(item.quantity) || 0
+    }
+  }
+
+  await sendKickChatMessage(
+    env,
+    `💰 ${username}: ${player?.coins ?? 0} coins | 🪱 Worms: ${baitCounts.Worm} | 🐟 Minnows: ${baitCounts.Minnow} | 🦗 Crickets: ${baitCounts.Cricket} | ✨ Golden Lures: ${baitCounts['Golden Lure']}`
+  )
+}
+if (message.toLowerCase() === '!fishhelp') {
+  await sendKickChatMessage(
+    env,
+    `🎣 Fishing commands: !fish | !balance | !buybait worms | !buybait minnows | !buybait crickets | !buybait golden lures`
+  )
+}
     return new Response('OK', {
       status: 200,
     })
