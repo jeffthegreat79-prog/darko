@@ -127,18 +127,47 @@ export async function onRequestPost({ request, env }) {
     const species = body.species
     const weight = Number(body.weight)
     const coins = Math.floor(Number(body.coins))
+    const commandId = Number(body.commandId)
 
     if (
-      !username ||
-      !species ||
-      !Number.isFinite(weight) ||
-      !Number.isFinite(coins)
-    ) {
+  !username ||
+  !species ||
+  !Number.isFinite(weight) ||
+  !Number.isFinite(coins) ||
+  !Number.isInteger(commandId) ||
+  commandId <= 0
+) {
       return new Response('Missing or invalid catch data', {
         status: 400,
       })
     }
+const processedAt = Math.floor(Date.now() / 1000)
 
+const processedCommand = await env.FISH_DB
+  .prepare(`
+    UPDATE fish_commands
+    SET processed_at = ?
+    WHERE id = ?
+      AND LOWER(username) = LOWER(?)
+      AND command = '!fish'
+      AND claimed_at IS NOT NULL
+      AND processed_at IS NULL
+    RETURNING id
+  `)
+  .bind(processedAt, commandId, username)
+  .first()
+
+if (!processedCommand) {
+  console.warn(
+    `Duplicate or invalid catch blocked for command ${commandId}`
+  )
+
+  return Response.json({
+    success: false,
+    duplicate: true,
+    commandId,
+  })
+}
     await env.FISH_DB
       .prepare(`
         INSERT INTO players (

@@ -589,7 +589,7 @@ function getRandomFish(rareBonus = 0) {
   return fishTable[0]
 }
 
-function castLine(kickUsername = null) {
+function castLine(kickUsername = null, kickCommandId = null) {
   if (isFishing) return
 
   playSound('cast')
@@ -697,6 +697,7 @@ const completedCatch = {
   isTrophy,
   caughtAt: new Date().toISOString(),
   username: typeof kickUsername === 'string' ? kickUsername : null,
+  kickCommandId,
 }
 
       setCatchResult(completedCatch)
@@ -712,6 +713,7 @@ if (completedCatch.username) {
       species: completedCatch.name,
       weight: completedCatch.weight,
       coins: completedCatch.value,
+      commandId: completedCatch.kickCommandId,
     }),
   })
    .then(async (response) => {
@@ -853,7 +855,7 @@ console.log(`Claimed fish command ${latest.id}`)
     console.error('Failed to load Kick player stats:', error)
   }
 
-   castLineRef.current?.(latest.username)
+   castLineRef.current?.(latest.username, latest.id)
 }
       }
     } catch (error) {
