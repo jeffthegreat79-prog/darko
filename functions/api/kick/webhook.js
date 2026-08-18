@@ -292,7 +292,7 @@ if (message.toLowerCase() === '!balance') {
 if (message.toLowerCase() === '!fishhelp') {
   await sendKickChatMessage(
     env,
-    `🎣 Fishing commands: !fish | !balance | !buybait worms | !buybait minnows | !buybait crickets | !buybait golden lures`
+    `🎣 Fishing commands: !fish | !balance | !gear | !buybait worms/minnows/crickets/golden lures`
   )
 }
     return new Response('OK', {
