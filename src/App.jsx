@@ -165,7 +165,7 @@ const defaultPlayer = {
   bait: null,
   speciesRecords: {},
 }
-const [kickConnected, setKickConnected] = useState(false)
+
 function App() {
   const [player, setPlayer] = useState(() => {
     const savedPlayer = localStorage.getItem('darko-player')
@@ -183,6 +183,7 @@ function App() {
       return defaultPlayer
     }
   })
+  const [kickConnected, setKickConnected] = useState(false)
 const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
 useEffect(() => {
   async function checkKickAuth() {
