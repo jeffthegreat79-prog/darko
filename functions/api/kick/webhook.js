@@ -200,6 +200,38 @@ await sendKickChatMessage(
     }
   }
 }
+if (message.toLowerCase() === '!inventory') {
+  const inventory = await env.FISH_DB
+    .prepare(`
+      SELECT item_type, item_name, quantity
+      FROM player_items
+      WHERE LOWER(username) = LOWER(?)
+      ORDER BY item_type, item_name
+    `)
+    .bind(username)
+    .all()
+
+  const items = inventory.results ?? []
+
+  const rods = items
+    .filter((item) => item.item_type === 'rod')
+    .map((item) => item.item_name)
+
+  const baits = items
+    .filter((item) => item.item_type === 'bait')
+    .map((item) => `${item.item_name}: ${item.quantity}`)
+
+  const rodText =
+    rods.length > 0 ? rods.join(', ') : 'None'
+
+  const baitText =
+    baits.length > 0 ? baits.join(', ') : 'None'
+
+  await sendKickChatMessage(
+    env,
+    `🎒 ${username}'s Inventory | Rods: ${rodText} | Bait: ${baitText}`
+  )
+}
 if (message.toLowerCase() === '!gear') {
   const loadout = await env.FISH_DB
     .prepare(`
@@ -292,7 +324,7 @@ if (message.toLowerCase() === '!balance') {
 if (message.toLowerCase() === '!fishhelp') {
   await sendKickChatMessage(
     env,
-    `🎣 Fishing commands: !fish | !balance | !gear | !buybait worms/minnows/crickets/golden lures`
+    `🎣 Fishing commands: !fish | !balance | !gear | !inventory | !buybait worms/minnows/crickets/golden lures`
   )
 }
     return new Response('OK', {
