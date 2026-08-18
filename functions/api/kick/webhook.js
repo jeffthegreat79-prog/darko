@@ -200,6 +200,46 @@ await sendKickChatMessage(
     }
   }
 }
+if (message.toLowerCase() === '!leaderboard') {
+  const leaderboard = await env.FISH_DB
+    .prepare(`
+      SELECT
+        username,
+        catches,
+        biggest_weight,
+        biggest_species
+      FROM players
+      WHERE catches > 0
+      ORDER BY catches DESC, biggest_weight DESC
+      LIMIT 5
+    `)
+    .all()
+
+  const players = leaderboard.results ?? []
+
+  if (players.length === 0) {
+    await sendKickChatMessage(
+      env,
+      `🏆 No fishing leaderboard entries yet!`
+    )
+  } else {
+    const leaderboardText = players
+      .map((player, index) => {
+        const biggest =
+          player.biggest_species && player.biggest_weight
+            ? ` | Best: ${Number(player.biggest_weight).toFixed(1)} lb ${player.biggest_species}`
+            : ''
+
+        return `${index + 1}. ${player.username}: ${player.catches} catches${biggest}`
+      })
+      .join(' | ')
+
+    await sendKickChatMessage(
+      env,
+      `🏆 Fishing Leaderboard | ${leaderboardText}`
+    )
+  }
+}
 if (message.toLowerCase() === '!inventory') {
   const inventory = await env.FISH_DB
     .prepare(`
@@ -324,7 +364,7 @@ if (message.toLowerCase() === '!balance') {
 if (message.toLowerCase() === '!fishhelp') {
   await sendKickChatMessage(
     env,
-    `🎣 Fishing commands: !fish | !balance | !gear | !inventory | !buybait worms/minnows/crickets/golden lures`
+    `🎣 Fishing commands: !fish | !balance | !gear | !inventory | !leaderboard | !buybait worms/minnows/crickets/golden lures`
   )
 }
     return new Response('OK', {

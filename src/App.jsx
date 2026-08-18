@@ -165,7 +165,7 @@ const defaultPlayer = {
   bait: null,
   speciesRecords: {},
 }
-
+const [kickConnected, setKickConnected] = useState(false)
 function App() {
   const [player, setPlayer] = useState(() => {
     const savedPlayer = localStorage.getItem('darko-player')
@@ -184,7 +184,25 @@ function App() {
     }
   })
 const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
+useEffect(() => {
+  async function checkKickAuth() {
+    try {
+      const response = await fetch('/api/kick/auth-status', {
+        cache: 'no-store',
+      })
 
+      if (!response.ok) return
+
+      const data = await response.json()
+
+      setKickConnected(Number(data.authRows) > 0)
+    } catch (error) {
+      console.error('Failed to check Kick auth status:', error)
+    }
+  }
+
+  checkKickAuth()
+}, [])
 useEffect(() => {
   setSoundEnabled(soundOn)
 }, [soundOn])
@@ -855,7 +873,7 @@ console.log(`Claimed fish command ${latest.id}`)
     console.error('Failed to load Kick player stats:', error)
   }
 
-   castLineRef.current?.(latest.username, latest.id)
+  castLineRef.current?.(latest.username, latest.id)
 }
       }
     } catch (error) {
@@ -909,8 +927,16 @@ return () => clearInterval(interval)
   {soundOn ? '🔊 Sound On' : '🔇 Sound Off'}
 </button>
 
-<button className="kick-button" type="button">
-  Connect Kick
+<button
+  className="kick-button"
+  type="button"
+  onClick={() => {
+    if (!kickConnected) {
+      window.location.href = '/api/kick/login'
+    }
+  }}
+>
+  {kickConnected ? '✓ Kick Connected' : 'Connect Kick'}
 </button>
 </div>
 
