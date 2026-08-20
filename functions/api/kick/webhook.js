@@ -252,14 +252,29 @@ if (message.toLowerCase() === '!inventory') {
     .all()
 
   const items = inventory.results ?? []
-
+const loadout = await env.FISH_DB
+  .prepare(`
+    SELECT equipped_rod, equipped_bait
+    FROM player_loadout
+    WHERE LOWER(username) = LOWER(?)
+  `)
+  .bind(username)
+  .first()
   const rods = items
-    .filter((item) => item.item_type === 'rod')
-    .map((item) => item.item_name)
+  .filter((item) => item.item_type === 'rod')
+  .map((item) =>
+    item.item_name === loadout?.equipped_rod
+      ? `${item.item_name} ✅`
+      : item.item_name
+  )
 
-  const baits = items
-    .filter((item) => item.item_type === 'bait')
-    .map((item) => `${item.item_name}: ${item.quantity}`)
+const baits = items
+  .filter((item) => item.item_type === 'bait')
+  .map((item) =>
+    item.item_name === loadout?.equipped_bait
+      ? `${item.item_name}: ${item.quantity} ✅`
+      : `${item.item_name}: ${item.quantity}`
+  )
 
   const rodText =
     rods.length > 0 ? rods.join(', ') : 'None'
