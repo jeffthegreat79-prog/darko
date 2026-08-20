@@ -95,7 +95,52 @@ const fishTable = [
   minWeight: .5,
   maxWeight: 5.0,
   icon: '🦈',
-}
+},
+ {
+    name: 'Channel Catfish',
+    rarity: 'Rare',
+    value: 75,
+    chance: 10,
+    minWeight: 1.5,
+    maxWeight: 10,
+    icon: '🐉',
+  },
+   {
+    name: 'Abyssal Leviathan',
+    rarity: 'Mythical',
+    value: 2500,
+    chance: 0.5,
+    minWeight: 0.2,
+    maxWeight: 2.5,
+    icon: '🐉', 
+  },
+   {
+    name: 'Abyssal Leviathan',
+    rarity: 'Mythical',
+    value: 2500,
+    chance: 0.5,
+    minWeight: 0.2,
+    maxWeight: 2.5,
+    icon: '🐉',
+  },
+   {
+    name: 'Abyssal Leviathan',
+    rarity: 'Mythical',
+    value: 2500,
+    chance: 0.5,
+    minWeight: 0.2,
+    maxWeight: 2.5,
+    icon: '🐉',
+  },
+   {
+    name: 'Abyssal Leviathan',
+    rarity: 'Mythical',
+    value: 2500,
+    chance: 0.5,
+    minWeight: 0.2,
+    maxWeight: 2.5,
+    icon: '🐉',
+  },
 ];
 const rods = [
   {
@@ -929,8 +974,9 @@ return () => clearInterval(interval)
 </button>
 
 <button
-  className="kick-button"
-  type="button"
+ className={`kick-button ${kickConnected ? 'connected' : ''}`}
+type="button"
+disabled={kickConnected}
   onClick={() => {
     if (!kickConnected) {
       window.location.href = '/api/kick/login'

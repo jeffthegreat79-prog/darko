@@ -127,7 +127,16 @@ button {
     border-color 180ms ease,
     background 180ms ease;
 }
-
+.kick-button.connected,
+.kick-button.connected:hover {
+  color: #53fc18;
+  border-color: rgba(83, 252, 24, 0.45);
+  background: rgba(83, 252, 24, 0.1);
+  box-shadow: 0 0 18px rgba(83, 252, 24, 0.12);
+  transform: none;
+  cursor: default;
+  opacity: 1;
+}
 .kick-button:hover,
 .secondary-button:hover {
   transform: translateY(-2px);
