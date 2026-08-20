@@ -306,9 +306,9 @@ if (message.toLowerCase() === '!gear') {
   }
 
   await sendKickChatMessage(
-    env,
-    `🎣 ${username}'s Gear | Rod: ${equippedRod} | Bait: ${equippedBait}${loadout?.equipped_bait ? ` (${baitQuantity} left)` : ''}`
-  )
+  env,
+  `🎣 ${username}'s Gear | Rod: ${equippedRod} | Bait: ${equippedBait}${loadout?.equipped_bait ? ` (${baitQuantity} left)` : ''}`
+)
 }
 if (message.toLowerCase() === '!balance') {
   await env.FISH_DB
