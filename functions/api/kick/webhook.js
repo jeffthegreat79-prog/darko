@@ -284,7 +284,7 @@ const baits = items
 
   await sendKickChatMessage(
     env,
-    `🎒 ${username}'s Inventory | Rods: ${rodText} | Bait: ${baitText}`
+    `🎒 ${username}'s Inventory | Rods: ${rodText} | Baits: ${baitText}`
   )
 }
 if (message.toLowerCase() === '!gear') {
@@ -379,7 +379,7 @@ if (message.toLowerCase() === '!balance') {
 if (message.toLowerCase() === '!fishhelp') {
   await sendKickChatMessage(
     env,
-    `🎣 Fishing commands: !fish | !balance | !gear | !inventory | !leaderboard | !buybait worms/minnows/crickets/golden lures`
+    `🎣 Fishing Commands | !fish - Cast a line | !balance - Coins & bait | !gear - Equipped gear | !inventory - Everything you own | !leaderboard - Top anglers | !buybait [bait] - Buy bait`
   )
 }
     return new Response('OK', {
