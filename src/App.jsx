@@ -107,7 +107,7 @@ const fishTable = [
   },
   {
     name: 'Tiger Musky',
-    rarity: 'rare',
+    rarity: 'Rare',
     value: 100,
     chance: 5,
     minWeight: 5.0,
@@ -116,7 +116,7 @@ const fishTable = [
     },
    {
     name: 'Crappie',
-    rarity: 'uncommon',
+    rarity: 'Uncommon',
     value: 25,
     chance: 15,
     minWeight: .4,
@@ -134,7 +134,7 @@ const fishTable = [
   },
   {
   name: 'Old broken fishing rod',
-  rarity: 'junk',
+  rarity: 'Junk',
   value: 8,
   chance: 4,
   minWeight: .7,
@@ -143,7 +143,7 @@ const fishTable = [
 },
 {
   name: 'Old Subaru Wiring Harness',
-  rarity: 'junk',
+  rarity: 'Junk',
   value: 25,
   chance: 4,
   minWeight: 2.0,
@@ -152,7 +152,7 @@ const fishTable = [
 },
 {
   name: 'Styrofoam cup',
-  rarity: 'junk',
+  rarity: 'Junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -170,7 +170,7 @@ const fishTable = [
 },
 {
   name: 'Old Vape',
-  rarity: 'junk',
+  rarity: 'Junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -179,7 +179,7 @@ const fishTable = [
 },
 {
   name: 'Waterlogged Pokémon Card',
-  rarity: 'junk',
+  rarity: 'Junk',
   value: 50,
   chance: 2,
   minWeight: 0.01,
@@ -1184,8 +1184,8 @@ disabled={kickConnected}
 
           <div className="water water-back" />
           <div className="water water-front" />
-          <div className="fish-shadow fish-one">➤</div>
-          <div className="fish-shadow fish-two">➤</div>
+         <div className="fish-shadow fish-one"></div>
+<div className="fish-shadow fish-two"></div>
         </div>
       </section>
 
