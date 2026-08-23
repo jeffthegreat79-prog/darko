@@ -4,8 +4,8 @@ export async function onRequestGet(context) {
   try {
     const latestCommand = await env.FISH_DB
       .prepare(`
-        SELECT id, username, command, created_at
-        FROM fish_commands
+        SELECT id, username, command, created_at, claimed_at, processed_at
+FROM fish_commands
         ORDER BY id DESC
         LIMIT 1
       `)

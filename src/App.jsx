@@ -942,12 +942,18 @@ useEffect(() => {
 
       const latest = await response.json()
 
-      // On page load, remember the newest command without triggering it.
-      if (!initialized) {
-        lastKickCommandId.current = latest?.id ?? null
-        initialized = true
-        return
-      }
+      // On page load, ignore old completed commands,
+// but allow an unclaimed command to still run.
+if (!initialized) {
+  initialized = true
+
+  if (!latest?.id) return
+
+  if (latest.claimed_at || latest.processed_at) {
+    lastKickCommandId.current = latest.id
+    return
+  }
+}
 
       // Only react when a NEW command appears.
       if (
