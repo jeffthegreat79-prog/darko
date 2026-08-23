@@ -156,12 +156,12 @@ const fishTable = [
   value: 3,
   chance: 6,
   minWeight: 0.1,
-  maxWeight: 0.1,
+  maxWeight: 0.2,
   icon: '🥤',
 },
 {
   name: 'Waterlogged worthless Pokémon Card',
-  rarity: 'junk',
+  rarity: 'Junk',
   value: 100,
   chance: 2,
   minWeight: 0.01,
@@ -797,10 +797,12 @@ const trophyThreshold = caughtFish.maxWeight * 0.95
 
 const isTrophy = weight >= trophyThreshold
 
-const weightProgress =
-  (weight - caughtFish.minWeight) /
-  (caughtFish.maxWeight - caughtFish.minWeight)
+const weightRange = caughtFish.maxWeight - caughtFish.minWeight
 
+const weightProgress =
+  weightRange > 0
+    ? (weight - caughtFish.minWeight) / weightRange
+    : 0
 const rewardMultiplier = 0.5 + weightProgress * 1.5
 
 const reward = Math.max(
