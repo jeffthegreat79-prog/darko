@@ -707,7 +707,11 @@ function getRandomFish(rareBonus = 0) {
   return fishTable[0]
 }
 
-function castLine(kickUsername = null, kickCommandId = null) {
+function castLine(
+  kickUsername = null,
+  kickCommandId = null,
+  serverCatch = null
+) {
   if (isFishing) return
 
   playSound('cast')
@@ -719,7 +723,7 @@ function castLine(kickUsername = null, kickCommandId = null) {
     ? player.baitCounts?.[equippedBaitName] ?? 0
     : 0
 
-  if (equippedBaitName && baitQuantity <= 0) {
+  if (!serverCatch && equippedBaitName && baitQuantity <= 0) {
     alert('You are out of that bait!')
 
     setPlayer((current) => ({
@@ -730,7 +734,7 @@ function castLine(kickUsername = null, kickCommandId = null) {
     return
   }
 
-  if (equippedBaitName) {
+ if (!serverCatch && equippedBaitName) {
     setPlayer((current) => {
       const currentQuantity =
         current.baitCounts?.[equippedBaitName] ?? 0
@@ -772,43 +776,71 @@ function castLine(kickUsername = null, kickCommandId = null) {
 
 const rareBonus = equippedBait?.rareBonus ?? 0
 
-const caughtFish = getRandomFish(rareBonus)
+const caughtFish =
+  serverCatch?.name
+    ? fishTable.find((fish) => fish.name === serverCatch.name) ??
+      {
+        name: serverCatch.name,
+        rarity: serverCatch.rarity,
+        icon: serverCatch.icon,
+        value: serverCatch.coins,
+        minWeight: serverCatch.weight,
+        maxWeight: serverCatch.weight,
+      }
+    : getRandomFish(rareBonus)
 
 playSound('catch')
 
-const equippedRod = rods.find((rod) => rod.name === player.rod)
+let weight
+let isTrophy
+let reward
 
-const weightCap = equippedRod?.weightCap ?? 0.7
+if (serverCatch?.name) {
+  // Kick cast: use the exact result already rolled by the server
+  weight = Number(serverCatch.weight)
+  isTrophy = Boolean(serverCatch.isTrophy)
+  reward = Math.max(1, Number(serverCatch.coins) || 1)
+} else {
+  // Manual site cast: keep the existing browser calculation
+  const equippedRod = rods.find((rod) => rod.name === player.rod)
 
-let rodMaxWeight = caughtFish.maxWeight * weightCap
+  const weightCap = equippedRod?.weightCap ?? 0.7
 
-if (equippedRod?.name === 'Legendary Rod' && Math.random() < 0.15) {
-  rodMaxWeight = caughtFish.maxWeight * 1.2
+  let rodMaxWeight = caughtFish.maxWeight * weightCap
+
+  if (
+    equippedRod?.name === 'Legendary Rod' &&
+    Math.random() < 0.15
+  ) {
+    rodMaxWeight = caughtFish.maxWeight * 1.2
+  }
+
+  weight = Number(
+    (
+      caughtFish.minWeight +
+      Math.random() * (rodMaxWeight - caughtFish.minWeight)
+    ).toFixed(1)
+  )
+
+  const trophyThreshold = caughtFish.maxWeight * 0.95
+  isTrophy = weight >= trophyThreshold
+
+  const weightRange =
+    caughtFish.maxWeight - caughtFish.minWeight
+
+  const weightProgress =
+    weightRange > 0
+      ? (weight - caughtFish.minWeight) / weightRange
+      : 0
+
+  const rewardMultiplier =
+    0.5 + weightProgress * 1.5
+
+  reward = Math.max(
+    1,
+    Math.round(caughtFish.value * rewardMultiplier)
+  )
 }
-
-const weight = Number(
-  (
-    caughtFish.minWeight +
-    Math.random() * (rodMaxWeight - caughtFish.minWeight)
-  ).toFixed(1)
-)
-
-const trophyThreshold = caughtFish.maxWeight * 0.95
-
-const isTrophy = weight >= trophyThreshold
-
-const weightRange = caughtFish.maxWeight - caughtFish.minWeight
-
-const weightProgress =
-  weightRange > 0
-    ? (weight - caughtFish.minWeight) / weightRange
-    : 0
-const rewardMultiplier = 0.5 + weightProgress * 1.5
-
-const reward = Math.max(
-  1,
-  Math.round(caughtFish.value * rewardMultiplier)
-)
 
 const completedCatch = {
   ...caughtFish,
@@ -975,7 +1007,11 @@ console.log(`Claimed fish command ${latest.id}`)
     console.error('Failed to load Kick player stats:', error)
   }
 
-  castLineRef.current?.(latest.username, latest.id)
+  castLineRef.current?.(
+  latest.username,
+  latest.id,
+  claimData.catch
+)
 }
       }
     } catch (error) {

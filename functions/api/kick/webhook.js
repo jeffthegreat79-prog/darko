@@ -1,3 +1,9 @@
+import {
+  getRandomFish,
+  createCatch,
+  RODS,
+  BAITS,
+} from '../../lib/fishing.js'
 import { sendKickChatMessage } from '../fish/catch.js'
 const BAITS = {
   worm: { name: 'Worm', replyName: 'Worms', cost: 10 },
@@ -30,7 +36,63 @@ const BAITS = {
     cost: 200,
   },
 }
+async function buildServerCatch(env, username) {
+  const loadout = await env.FISH_DB
+    .prepare(`
+      SELECT equipped_rod, equipped_bait
+      FROM player_loadout
+      WHERE LOWER(username) = LOWER(?)
+    `)
+    .bind(username)
+    .first()
 
+  const rodName =
+    loadout?.equipped_rod || "Grandpa's old Rod"
+
+  const baitName =
+    loadout?.equipped_bait || null
+
+  const rod =
+    RODS[rodName] || RODS["Grandpa's old Rod"]
+
+  let baitQuantity = 0
+
+  if (baitName) {
+    const baitItem = await env.FISH_DB
+      .prepare(`
+        SELECT quantity
+        FROM player_items
+        WHERE LOWER(username) = LOWER(?)
+          AND item_type = 'bait'
+          AND item_name = ?
+      `)
+      .bind(username, baitName)
+      .first()
+
+    baitQuantity = Number(baitItem?.quantity ?? 0)
+  }
+
+  const bait =
+    baitName && baitQuantity > 0
+      ? BAITS[baitName]
+      : null
+
+  const rareBonus = bait?.rareBonus ?? 0
+
+  const fish = getRandomFish(rareBonus)
+
+  const catchResult = createCatch(fish, {
+    weightCap: rod.weightCap,
+    legendaryRod: rod.legendary === true,
+  })
+
+  return {
+    ...catchResult,
+    rodName,
+    baitName: bait ? baitName : null,
+    baitQuantity,
+  }
+}
 export async function onRequestPost(context) {
   const { request, env } = context
 
@@ -88,14 +150,70 @@ if (lastFish) {
 }
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
-      await env.FISH_DB
-        .prepare(`
-          INSERT OR IGNORE INTO fish_commands
-          (kick_message_id, username, command)
-          VALUES (?, ?, ?)
-        `)
-        .bind(kickMessageId, username, message)
-        .run()
+     const serverCatch = await buildServerCatch(env, username)
+
+const commandInsert = await env.FISH_DB
+  .prepare(`
+    INSERT OR IGNORE INTO fish_commands (
+      kick_message_id,
+      username,
+      command,
+      catch_name,
+      catch_rarity,
+      catch_weight,
+      catch_coins,
+      catch_icon,
+      catch_is_trophy
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `)
+  .bind(
+    kickMessageId,
+    username,
+    message,
+    serverCatch.name,
+    serverCatch.rarity,
+    serverCatch.weight,
+    serverCatch.coins,
+    serverCatch.icon,
+    serverCatch.isTrophy ? 1 : 0
+  )
+  .run()
+const commandWasInserted =
+  Number(commandInsert.meta?.changes ?? 0) === 1
+
+if (commandWasInserted && serverCatch.baitName) {
+  const updatedBait = await env.FISH_DB
+    .prepare(`
+      UPDATE player_items
+      SET quantity = quantity - 1
+      WHERE LOWER(username) = LOWER(?)
+        AND item_type = 'bait'
+        AND item_name = ?
+        AND quantity > 0
+      RETURNING quantity
+    `)
+    .bind(username, serverCatch.baitName)
+    .first()
+
+  const remainingBait =
+    Number(updatedBait?.quantity ?? 0)
+
+  if (updatedBait && remainingBait <= 0) {
+    await env.FISH_DB
+      .prepare(`
+        UPDATE player_loadout
+        SET equipped_bait = NULL
+        WHERE LOWER(username) = LOWER(?)
+          AND equipped_bait = ?
+      `)
+      .bind(username, serverCatch.baitName)
+      .run()
+  }
+}
+console.log(
+  `🎣 Server rolled ${serverCatch.name} (${serverCatch.weight} lb, ${serverCatch.coins} coins) for ${username}`
+)
 await env.FISH_DB
   .prepare(`
     INSERT OR IGNORE INTO players (username)
@@ -325,7 +443,7 @@ if (message.toLowerCase() === '!gear') {
   `🎣 ${username}'s Gear | Rod: ${equippedRod} | Bait: ${equippedBait}${loadout?.equipped_bait ? ` (${baitQuantity} left)` : ''}`
 )
 }
-if (message.toLowerCase() === '!balance') {
+if (message === '!balance') {
   await env.FISH_DB
     .prepare(`
       INSERT OR IGNORE INTO players (username)
