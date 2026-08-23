@@ -221,6 +221,70 @@ await env.FISH_DB
   `)
   .bind(username)
   .run()
+  if (commandWasInserted) {
+  const processedAt = Math.floor(Date.now() / 1000)
+
+  const processedCommand = await env.FISH_DB
+    .prepare(`
+      UPDATE fish_commands
+      SET processed_at = ?
+      WHERE kick_message_id = ?
+        AND processed_at IS NULL
+      RETURNING id
+    `)
+    .bind(processedAt, kickMessageId)
+    .first()
+
+  if (processedCommand) {
+    await env.FISH_DB
+      .prepare(`
+        INSERT INTO players (
+          username,
+          coins,
+          catches,
+          biggest_weight,
+          biggest_species
+        )
+        VALUES (?, ?, 1, ?, ?)
+
+        ON CONFLICT(username) DO UPDATE SET
+          coins = players.coins + excluded.coins,
+          catches = players.catches + 1,
+
+          biggest_weight =
+            CASE
+              WHEN excluded.biggest_weight > players.biggest_weight
+              THEN excluded.biggest_weight
+              ELSE players.biggest_weight
+            END,
+
+          biggest_species =
+            CASE
+              WHEN excluded.biggest_weight > players.biggest_weight
+              THEN excluded.biggest_species
+              ELSE players.biggest_species
+            END,
+
+          updated_at = CURRENT_TIMESTAMP
+      `)
+      .bind(
+        username,
+        serverCatch.coins,
+        serverCatch.weight,
+        serverCatch.name
+      )
+      .run()
+
+    await sendKickChatMessage(
+      env,
+      `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+    )
+
+    console.log(
+      `✅ Server completed catch ${processedCommand.id} for ${username}`
+    )
+  }
+}
       console.log(`🎣 Saved !fish command for ${username}`)
     }
 if (message.toLowerCase().startsWith('!buybait ')) {

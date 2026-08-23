@@ -949,10 +949,10 @@ if (!initialized) {
 
   if (!latest?.id) return
 
-  if (latest.claimed_at || latest.processed_at) {
-    lastKickCommandId.current = latest.id
-    return
-  }
+ if (latest.claimed_at) {
+  lastKickCommandId.current = latest.id
+  return
+}
 }
 
       // Only react when a NEW command appears.
