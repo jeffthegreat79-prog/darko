@@ -2,7 +2,7 @@ import {
   getRandomFish,
   createCatch,
   RODS,
-  BAITS,
+  BAITS as FISHING_BAITS,
 } from '../../lib/fishing.js'
 import { sendKickChatMessage } from '../fish/catch.js'
 const BAITS = {
@@ -74,7 +74,7 @@ async function buildServerCatch(env, username) {
 
   const bait =
     baitName && baitQuantity > 0
-      ? BAITS[baitName]
+      ? FISHING_BAITS[baitName]
       : null
 
   const rareBonus = bait?.rareBonus ?? 0
