@@ -438,6 +438,7 @@ function playGameSound(sound) {
 }
   const [catchResult, setCatchResult] = useState(null)
 const [kickPlayerStats, setKickPlayerStats] = useState(null)
+const [kickCatchHistory, setKickCatchHistory] = useState([])
 const [isFishing, setIsFishing] = useState(false)
 
 const [fishingPhase, setFishingPhase] = useState('idle')
@@ -448,6 +449,39 @@ const castLineRef = useRef(null)
   useEffect(() => {
     localStorage.setItem('darko-player', JSON.stringify(player))
   }, [player])
+  useEffect(() => {
+  const username = kickPlayerStats?.username
+
+  if (!username) {
+    setKickCatchHistory([])
+    return
+  }
+
+  async function loadKickCatchHistory() {
+    try {
+      const response = await fetch(
+        `/api/fish/history?username=${encodeURIComponent(username)}`,
+        { cache: 'no-store' }
+      )
+
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+
+      const data = await response.json()
+
+      setKickCatchHistory(data.catches ?? [])
+
+      console.log(
+        `🎣 Loaded ${data.catches?.length ?? 0} persistent catches for ${username}`
+      )
+    } catch (error) {
+      console.error('Failed to load Kick catch history:', error)
+    }
+  }
+
+  loadKickCatchHistory()
+}, [kickPlayerStats?.username, kickPlayerStats?.catches])
 async function buyRod(rod) {
   if (kickPlayerStats?.username) {
     try {
@@ -1249,7 +1283,7 @@ disabled={kickConnected}
           )}
         </div>
 
-        {player.inventory.length === 0 ? (
+        {(kickPlayerStats?.username ? kickCatchHistory : player.inventory).length === 0 ? (
           <div className="empty-inventory">
             <span>🎣</span>
             <h3>Your inventory is empty</h3>
@@ -1257,7 +1291,7 @@ disabled={kickConnected}
           </div>
         ) : (
           <div className="inventory-grid">
-            {player.inventory.map((fish, index) => (
+            {(kickPlayerStats?.username ? kickCatchHistory : player.inventory).map((fish, index) => (
               <article
                 className="inventory-card"
                 key={`${fish.caughtAt}-${index}`}
