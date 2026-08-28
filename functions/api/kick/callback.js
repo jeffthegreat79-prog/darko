@@ -28,9 +28,18 @@ export async function onRequestGet(context) {
     })
   }
 
-  const savedState = getCookie(request, 'kick_oauth_state')
-  const codeVerifier = getCookie(request, 'kick_code_verifier')
+ const oauthFlow = getCookie(request, 'kick_oauth_flow')
+const isViewerLogin = oauthFlow === 'viewer'
 
+const savedState = getCookie(
+  request,
+  isViewerLogin ? 'kick_viewer_oauth_state' : 'kick_oauth_state'
+)
+
+const codeVerifier = getCookie(
+  request,
+  isViewerLogin ? 'kick_viewer_code_verifier' : 'kick_code_verifier'
+)
   if (!code || !state) {
     return new Response('Missing authorization code or state.', {
       status: 400,
@@ -86,6 +95,100 @@ export async function onRequestGet(context) {
       }
     )
   }
+  if (isViewerLogin) {
+  const userResponse = await fetch(
+    'https://api.kick.com/public/v1/users',
+    {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+      },
+    }
+  )
+
+  const userData = await userResponse.json()
+
+  if (!userResponse.ok) {
+    console.error('Kick viewer lookup error:', userData)
+
+    return new Response('Could not load Kick viewer profile.', {
+      status: 500,
+    })
+  }
+
+  const viewer = userData?.data?.[0]
+
+  if (!viewer?.user_id || !viewer?.name) {
+    return new Response('Kick viewer profile was missing.', {
+      status: 500,
+    })
+  }
+
+  await env.FISH_DB
+    .prepare(`
+      CREATE TABLE IF NOT EXISTS kick_viewer_sessions (
+        session_id TEXT PRIMARY KEY,
+        kick_user_id TEXT NOT NULL,
+        username TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+      )
+    `)
+    .run()
+
+  const sessionId = crypto.randomUUID()
+  const sessionMaxAge = 60 * 60 * 24 * 30
+  const sessionExpiresAt = Date.now() + sessionMaxAge * 1000
+
+  await env.FISH_DB
+    .prepare(`
+      INSERT INTO kick_viewer_sessions (
+        session_id,
+        kick_user_id,
+        username,
+        expires_at,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, ?)
+    `)
+    .bind(
+      sessionId,
+      String(viewer.user_id),
+      viewer.name,
+      sessionExpiresAt,
+      Date.now()
+    )
+    .run()
+
+  const headers = new Headers({
+    Location: 'https://darko.wtf/',
+    'Cache-Control': 'no-store',
+  })
+
+  headers.append(
+    'Set-Cookie',
+    `kick_viewer_session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${sessionMaxAge}`
+  )
+
+  headers.append(
+    'Set-Cookie',
+    'kick_viewer_code_verifier=; Path=/api/kick; HttpOnly; Secure; SameSite=Lax; Max-Age=0'
+  )
+
+  headers.append(
+    'Set-Cookie',
+    'kick_viewer_oauth_state=; Path=/api/kick; HttpOnly; Secure; SameSite=Lax; Max-Age=0'
+  )
+
+  headers.append(
+    'Set-Cookie',
+    'kick_oauth_flow=; Path=/api/kick; HttpOnly; Secure; SameSite=Lax; Max-Age=0'
+  )
+
+  return new Response(null, {
+    status: 302,
+    headers,
+  })
+}
 const expiresIn = Number(tokenData.expires_in)
 const expiresAt = Date.now() + expiresIn * 1000
 

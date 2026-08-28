@@ -285,23 +285,60 @@ function App() {
   const [kickConnected, setKickConnected] = useState(false)
 const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
 useEffect(() => {
-  async function checkKickAuth() {
+  async function checkKickViewer() {
     try {
-      const response = await fetch('/api/kick/auth-status', {
+      const response = await fetch('/api/kick/viewer-status', {
         cache: 'no-store',
       })
 
-      if (!response.ok) return
+      if (!response.ok) {
+        setKickConnected(false)
+        return
+      }
 
       const data = await response.json()
+      const username = data.viewer?.username
 
-      setKickConnected(Number(data.authRows) > 0)
+      if (!data.connected || !username) {
+        setKickConnected(false)
+        setKickPlayerStats(null)
+        return
+      }
+
+      setKickConnected(true)
+
+      const playerResponse = await fetch(
+        `/api/player?username=${encodeURIComponent(username)}`,
+        { cache: 'no-store' }
+      )
+
+      if (playerResponse.ok) {
+        const playerData = await playerResponse.json()
+        setKickPlayerStats(playerData.player)
+      } else {
+        console.log(`Kick viewer ${username} has no fishing profile yet.`)
+
+        setKickPlayerStats({
+          username,
+          coins: 0,
+          catches: 0,
+          biggest_weight: 0,
+          biggest_species: null,
+          items: [],
+          loadout: {
+            equipped_rod: null,
+            equipped_bait: null,
+          },
+        })
+      }
     } catch (error) {
-      console.error('Failed to check Kick auth status:', error)
+      console.error('Failed to check Kick viewer:', error)
+      setKickConnected(false)
+      setKickPlayerStats(null)
     }
   }
 
-  checkKickAuth()
+  checkKickViewer()
 }, [])
 useEffect(() => {
   setSoundEnabled(soundOn)
@@ -1135,7 +1172,7 @@ type="button"
 disabled={kickConnected}
   onClick={() => {
     if (!kickConnected) {
-      window.location.href = '/api/kick/login'
+      window.location.href = '/api/kick/viewer-login'
     }
   }}
 >
