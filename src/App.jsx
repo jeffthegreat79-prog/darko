@@ -1443,11 +1443,20 @@ disabled={kickConnected}
       </div>
 
       <button
-        type="button"
-        onClick={() => setLeaderboardOpen(false)}
-      >
-        Close
-      </button>
+  type="button"
+  onClick={() => setLeaderboardOpen(false)}
+  style={{
+    background: 'transparent',
+    color: 'inherit',
+    border: '1px solid rgba(255,255,255,0.25)',
+    borderRadius: '10px',
+    padding: '0.55rem 0.9rem',
+    cursor: 'pointer',
+    fontWeight: 600,
+  }}
+>
+  ✕ Close
+</button>
     </div>
 
     {leaderboardLoading ? (
