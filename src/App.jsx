@@ -543,6 +543,25 @@ async function loadLeaderboard() {
     setLeaderboardLoading(false)
   }
 }
+async function disconnectKickViewer() {
+  try {
+    const response = await fetch('/api/kick/viewer-logout', {
+      method: 'POST',
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      throw new Error(await response.text())
+    }
+
+    setKickConnected(false)
+    setKickPlayerStats(null)
+    setKickCatchHistory([])
+  } catch (error) {
+    console.error('Failed to disconnect Kick viewer:', error)
+    alert('Failed to disconnect Kick')
+  }
+}
 async function buyRod(rod) {
   if (kickPlayerStats?.username) {
     try {
@@ -1167,16 +1186,19 @@ return () => clearInterval(interval)
 </button>
 
 <button
- className={`kick-button ${kickConnected ? 'connected' : ''}`}
-type="button"
-disabled={kickConnected}
+  className={`kick-button ${kickConnected ? 'connected' : ''}`}
+  type="button"
   onClick={() => {
-    if (!kickConnected) {
+    if (kickConnected) {
+      disconnectKickViewer()
+    } else {
       window.location.href = '/api/kick/viewer-login'
     }
   }}
 >
-  {kickConnected ? '✓ Kick Connected' : 'Connect Kick'}
+  {kickConnected
+    ? `✓ ${kickPlayerStats?.username || 'Kick'} Connected`
+    : 'Connect Kick'}
 </button>
 </div>
 
