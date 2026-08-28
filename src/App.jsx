@@ -444,6 +444,9 @@ const [isFishing, setIsFishing] = useState(false)
 const [fishingPhase, setFishingPhase] = useState('idle')
 
 const [shopOpen, setShopOpen] = useState(false)
+const [leaderboardOpen, setLeaderboardOpen] = useState(false)
+const [leaderboard, setLeaderboard] = useState([])
+const [leaderboardLoading, setLeaderboardLoading] = useState(false)
 const lastKickCommandId = useRef(null)
 const castLineRef = useRef(null)
   useEffect(() => {
@@ -482,6 +485,27 @@ const castLineRef = useRef(null)
 
   loadKickCatchHistory()
 }, [kickPlayerStats?.username, kickPlayerStats?.catches])
+async function loadLeaderboard() {
+  setLeaderboardLoading(true)
+
+  try {
+    const response = await fetch('/api/leaderboard', {
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      throw new Error(await response.text())
+    }
+
+    const data = await response.json()
+    setLeaderboard(data.leaderboard ?? [])
+  } catch (error) {
+    console.error('Failed to load leaderboard:', error)
+    setLeaderboard([])
+  } finally {
+    setLeaderboardLoading(false)
+  }
+}
 async function buyRod(rod) {
   if (kickPlayerStats?.username) {
     try {
@@ -1374,7 +1398,14 @@ disabled={kickConnected}
             <p>Spend your coins on gear, storage, boats, and new locations.</p>
           </article>
 
-          <article className="feature-card">
+          <article
+  className="feature-card"
+  onClick={() => {
+  setLeaderboardOpen(true)
+  loadLeaderboard()
+}}
+  style={{ cursor: "pointer" }}
+>
             <span>🏆</span>
             <h3>Leaderboards</h3>
             <p>Compete for the biggest fish and the largest fortune.</p>
@@ -1387,6 +1418,84 @@ disabled={kickConnected}
           </article>
         </div>
        
+{leaderboardOpen && (
+  <div
+    className="feature-card"
+    style={{
+      marginTop: '2rem',
+      padding: '1.5rem',
+    }}
+  >
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '1rem',
+        marginBottom: '1rem',
+      }}
+    >
+      <div>
+        <h3 style={{ margin: 0 }}>🏆 Fishing Leaderboard</h3>
+        <p style={{ margin: '0.35rem 0 0' }}>
+          Top anglers across Darko.wtf
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setLeaderboardOpen(false)}
+      >
+        Close
+      </button>
+    </div>
+
+    {leaderboardLoading ? (
+      <p>Loading leaderboard...</p>
+    ) : leaderboard.length === 0 ? (
+      <p>No fishing leaderboard entries yet!</p>
+    ) : (
+      <div style={{ display: 'grid', gap: '0.75rem' }}>
+        {leaderboard.map((player, index) => (
+          <div
+            key={player.username}
+            style={{
+              padding: '0.85rem 1rem',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '12px',
+            }}
+          >
+            <strong>
+              {index === 0
+                ? '🥇'
+                : index === 1
+                  ? '🥈'
+                  : index === 2
+                    ? '🥉'
+                    : `#${index + 1}`}
+              {' '}
+              {player.username}
+            </strong>
+
+            <div style={{ marginTop: '0.35rem' }}>
+              🎣 {player.catches} catches
+              {' • '}
+              🪙 {player.coins} coins
+            </div>
+
+            {player.biggest_species && (
+              <div style={{ marginTop: '0.25rem' }}>
+                Biggest: {Number(player.biggest_weight || 0).toFixed(1)} lb{' '}
+                {player.biggest_species}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
 
                 {shopOpen && (
          <div className="feature-card fishing-shop" style={{ marginTop: '2rem' }}>
