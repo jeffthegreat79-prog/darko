@@ -226,7 +226,7 @@ export const fishTable = [
   },
   {
   name: 'Old broken fishing rod',
-  rarity: 'Junk',
+  type: 'junk',
   value: 8,
   chance: 4,
   minWeight: .7,
@@ -235,7 +235,7 @@ export const fishTable = [
 },
 {
   name: 'Old Subaru Wiring Harness',
-  rarity: 'Junk',
+  type: 'junk',
   value: 25,
   chance: 4,
   minWeight: 2.0,
@@ -244,7 +244,7 @@ export const fishTable = [
 },
 {
   name: 'Styrofoam cup',
-  rarity: 'Junk',
+  type: 'junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -252,17 +252,8 @@ export const fishTable = [
   icon: '🥤',
 },
 {
-  name: 'Waterlogged worthless Pokémon Card',
-  rarity: 'Junk',
-  value: 100,
-  chance: 2,
-  minWeight: 0.01,
-  maxWeight: 0.05,
-  icon: '🃏',
-},
-{
   name: 'Old Vape',
-  rarity: 'Junk',
+  type: 'junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -270,9 +261,10 @@ export const fishTable = [
   icon: '🪫',
 },
 {
-  name: 'Waterlogged Pokémon Card',
-  rarity: 'Junk',
-  value: 50,
+  name: 'Graded pristine Pokémon Card',
+  type: 'treasure',
+  rarity: 'Legendary',
+  value: 100,
   chance: 2,
   minWeight: 0.01,
   maxWeight: 0.05,
@@ -280,6 +272,7 @@ export const fishTable = [
 },
 {
   name: 'Rusty Taurus 9mm',
+  type: 'treasure',
   rarity: 'Legendary',
   value: 500,
   chance: .5,
@@ -335,7 +328,10 @@ export function getRandomFish(rareBonus = 0) {
   }
 
   const weightedFish = fishTable.map((fish) => {
-    const boostLevel = rarityBoostLevel[fish.rarity] ?? 0
+   const boostLevel =
+  fish.type === 'junk' || fish.type === 'treasure'
+    ? 0
+    : rarityBoostLevel[fish.rarity] ?? 0
 
     const multiplier =
       1 + (rareBonus * boostLevel) / 100
@@ -384,7 +380,8 @@ export function createCatch(
   )
 
   const trophyThreshold = fish.maxWeight * 0.95
-  const isTrophy = weight >= trophyThreshold
+  const isActualFish = !fish.type || fish.type === 'fish'
+const isTrophy = isActualFish && weight >= trophyThreshold
 
   const weightRange = fish.maxWeight - fish.minWeight
 

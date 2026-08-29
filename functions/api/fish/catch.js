@@ -128,10 +128,12 @@ export async function onRequestPost({ request, env }) {
     const weight = Number(body.weight)
     const coins = Math.floor(Number(body.coins))
     const commandId = Number(body.commandId)
+    const catchType = body.type || 'fish'
 
     if (
   !username ||
   !species ||
+  !['fish', 'junk', 'treasure'].includes(catchType) ||
   !Number.isFinite(weight) ||
   !Number.isFinite(coins) ||
   !Number.isInteger(commandId) ||

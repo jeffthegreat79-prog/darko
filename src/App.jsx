@@ -233,7 +233,7 @@ const fishTable = [
   },
   {
   name: 'Old broken fishing rod',
-  rarity: 'Junk',
+  type: 'junk',
   value: 8,
   chance: 4,
   minWeight: .7,
@@ -242,7 +242,7 @@ const fishTable = [
 },
 {
   name: 'Old Subaru Wiring Harness',
-  rarity: 'Junk',
+  type: 'junk',
   value: 25,
   chance: 4,
   minWeight: 2.0,
@@ -251,7 +251,7 @@ const fishTable = [
 },
 {
   name: 'Styrofoam cup',
-  rarity: 'Junk',
+  type: 'junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -259,8 +259,9 @@ const fishTable = [
   icon: '🥤',
 },
 {
-  name: 'Waterlogged worthless Pokémon Card',
-  rarity: 'Junk',
+  name: 'Graded pristine Pokémon Card',
+  type: 'treasure',
+  rarity: 'Legendary',
   value: 100,
   chance: 2,
   minWeight: 0.01,
@@ -269,7 +270,7 @@ const fishTable = [
 },
 {
   name: 'Old Vape',
-  rarity: 'Junk',
+  type: 'junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -277,16 +278,8 @@ const fishTable = [
   icon: '🪫',
 },
 {
-  name: 'Waterlogged Pokémon Card',
-  rarity: 'Junk',
-  value: 50,
-  chance: 2,
-  minWeight: 0.01,
-  maxWeight: 0.05,
-  icon: '🃏',
-},
-{
   name: 'Rusty Taurus 9mm',
+  type: 'treasure',
   rarity: 'Legendary',
   value: 500,
   chance: .5,
@@ -1035,8 +1028,9 @@ if (serverCatch?.name) {
     ).toFixed(1)
   )
 
-  const trophyThreshold = caughtFish.maxWeight * 0.95
-  isTrophy = weight >= trophyThreshold
+  const isActualFish = !caughtFish.type || caughtFish.type === 'fish'
+const trophyThreshold = caughtFish.maxWeight * 0.95
+isTrophy = isActualFish && weight >= trophyThreshold
 
   const weightRange =
     caughtFish.maxWeight - caughtFish.minWeight
@@ -1076,6 +1070,7 @@ if (completedCatch.username) {
     body: JSON.stringify({
       username: completedCatch.username,
       species: completedCatch.name,
+      type: completedCatch.type || 'fish',
       weight: completedCatch.weight,
       coins: completedCatch.value,
       commandId: completedCatch.kickCommandId,
@@ -1405,16 +1400,32 @@ return () => clearInterval(interval)
 )}
 {catchResult.username && (
   <p className="kick-catcher">
-    🎣 {catchResult.username} caught:
+    {catchResult.type === 'junk' ? '🗑️' : catchResult.type === 'treasure' ? '✨' : '🎣'}{' '}
+{catchResult.username}{' '}
+{catchResult.type === 'junk'
+  ? 'fished up:'
+  : catchResult.type === 'treasure'
+    ? 'found:'
+    : 'caught:'}
   </p>
 )}
   <h2>{catchResult.name}</h2>
 
-  <span
-    className={`rarity ${catchResult.rarity.toLowerCase()}`}
-  >
-    {catchResult.rarity}
-  </span>
+ <span
+  className={`rarity ${
+    catchResult.type === 'junk'
+      ? 'junk'
+      : catchResult.type === 'treasure'
+        ? 'treasure'
+        : catchResult.rarity?.toLowerCase() || 'common'
+  }`}
+>
+  {catchResult.type === 'junk'
+    ? 'JUNK'
+    : catchResult.type === 'treasure'
+      ? 'TREASURE'
+      : catchResult.rarity}
+</span>
 
   <strong>{catchResult.weight} lb</strong>
   <strong>+{catchResult.value} coins</strong>

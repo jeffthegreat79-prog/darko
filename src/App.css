@@ -433,7 +433,17 @@ button {
   font-weight: 900;
   text-transform: uppercase;
 }
+.rarity.junk {
+  background: rgba(139, 148, 158, 0.18);
+  color: #8b949e;
+  border: 1px solid rgba(139, 148, 158, 0.35);
+}
 
+.rarity.treasure {
+  background: rgba(255, 215, 0, 0.16);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+}
 .common {
   background: rgba(255, 255, 255, 0.1);
 }
