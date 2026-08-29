@@ -1372,7 +1372,13 @@ return () => clearInterval(interval)
 
             {catchResult && (
               <div
-                className={`catch-card catch-reveal ${catchResult.rarity.toLowerCase()}-catch`}
+                className={`catch-card catch-reveal ${
+  catchResult.type === 'junk'
+    ? 'junk'
+    : catchResult.type === 'treasure'
+      ? 'treasure'
+      : catchResult.rarity?.toLowerCase() || 'common'
+}-catch`}
               >
                 <span className="catch-icon">{catchResult.icon}</span>
 
@@ -1492,9 +1498,21 @@ return () => clearInterval(interval)
                 <span className="inventory-icon">{fish.icon}</span>
 
                 <div>
-                  <span className={`rarity ${fish.rarity.toLowerCase()}`}>
-                    {fish.rarity}
-                  </span>
+                <span
+  className={`rarity ${
+    fish.type === 'junk'
+      ? 'junk'
+      : fish.type === 'treasure'
+        ? 'treasure'
+        : fish.rarity?.toLowerCase() || 'common'
+  }`}
+>
+  {fish.type === 'junk'
+    ? 'JUNK'
+    : fish.type === 'treasure'
+      ? 'TREASURE'
+      : fish.rarity || 'Common'}
+</span>
 
                   <h3>{fish.name}</h3>
                   <p>{fish.weight} lb</p>
@@ -1513,7 +1531,9 @@ return () => clearInterval(interval)
   </div>
 
   <div className="records-grid">
-    {fishTable.map((fish) => {
+   {fishTable
+  .filter((fish) => !fish.type || fish.type === 'fish')
+  .map((fish) => {
       const record = player.speciesRecords?.[fish.name]
 
       return (
@@ -1526,7 +1546,15 @@ return () => clearInterval(interval)
 
             <div>
               <h3>{fish.name}</h3>
-              <p className={`record-rarity rarity-${fish.rarity.toLowerCase()}`}>
+              <p
+  className={`record-rarity rarity-${
+    fish.type === 'junk'
+      ? 'junk'
+      : fish.type === 'treasure'
+        ? 'treasure'
+        : fish.rarity?.toLowerCase() || 'common'
+  }`}
+>
   {fish.rarity}
 </p>
             </div>

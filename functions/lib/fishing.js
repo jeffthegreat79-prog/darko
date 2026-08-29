@@ -227,6 +227,7 @@ export const fishTable = [
   {
   name: 'Old broken fishing rod',
   type: 'junk',
+  rarity: 'Junk',
   value: 8,
   chance: 4,
   minWeight: .7,
@@ -236,6 +237,7 @@ export const fishTable = [
 {
   name: 'Old Subaru Wiring Harness',
   type: 'junk',
+  rarity: 'Junk',
   value: 25,
   chance: 4,
   minWeight: 2.0,
@@ -245,6 +247,7 @@ export const fishTable = [
 {
   name: 'Styrofoam cup',
   type: 'junk',
+  rarity: 'Junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
@@ -254,6 +257,7 @@ export const fishTable = [
 {
   name: 'Old Vape',
   type: 'junk',
+  rarity: 'Junk',
   value: 3,
   chance: 6,
   minWeight: 0.1,
