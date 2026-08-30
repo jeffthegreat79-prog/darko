@@ -1294,6 +1294,15 @@ return () => clearInterval(interval)
     ? `✓ ${kickPlayerStats?.username || 'Kick'} Connected`
     : 'Connect Kick'}
 </button>
+<button
+  className="dinko-nav-button"
+  type="button"
+  onClick={() => {
+    window.location.href = '/dinko-overlay'
+  }}
+>
+  🔴 Play DINKO
+</button>
 </div>
 
       <section className="hero" id="game">

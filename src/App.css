@@ -113,7 +113,26 @@ button {
 .nav-links a:hover {
   color: var(--text);
 }
+.dinko-nav-button {
+  border: 1px solid rgba(255, 70, 90, 0.55);
+  background: rgba(255, 55, 80, 0.12);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
 
+.dinko-nav-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 55, 80, 0.2);
+  box-shadow: 0 0 18px rgba(255, 55, 80, 0.2);
+}
 .kick-button,
 .secondary-button {
   border: 1px solid var(--panel-border);

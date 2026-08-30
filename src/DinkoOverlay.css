@@ -1,7 +1,11 @@
 .dinko-overlay-body {
   margin: 0;
   overflow: hidden;
-  background: transparent !important;
+  background: #00ff00 !important;
+}
+
+.dinko-overlay-body #root {
+  background: #00ff00 !important;
 }
 
 .dinko-overlay {
@@ -10,7 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: #00ff00;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -20,14 +24,9 @@
   padding: 22px;
   border-radius: 28px;
   border: 2px solid rgba(63, 230, 255, 0.55);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(5, 24, 38, 0.96),
-      rgba(2, 10, 18, 0.96)
-    );
-  box-shadow:
-    0 0 35px rgba(0, 210, 255, 0.22),
+ background: #00ff00;
+ box-shadow:
+  0 0 35px rgba(0, 210, 255, 0.22),
     inset 0 0 30px rgba(0, 160, 220, 0.08);
 }
 
@@ -73,7 +72,7 @@
       circle at 35% 30%,
       #ff8898 0%,
       #ef405a 45%,
-      #a9122d 100%
+      #03930b 100%
     );
 
   box-shadow:
@@ -88,8 +87,8 @@
 
 .dinko-puck.active {
   box-shadow:
-    0 0 15px rgba(255, 60, 90, 0.95),
-    0 0 32px rgba(255, 60, 90, 0.45);
+    0 0 15px rgba(17, 206, 114, 0.95),
+    0 0 32px rgba(58, 193, 116, 0.45);
 }
 
 .dinko-puck-name {
