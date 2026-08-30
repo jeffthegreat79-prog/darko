@@ -290,11 +290,10 @@ if (serverCatch.type === 'junk') {
 } else {
   catchMessage = `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
 }
-    await sendKickChatMessage(
-      env,
-      `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
-    )
-
+   await sendKickChatMessage(
+  env,
+  catchMessage
+)
     console.log(
       `✅ Server completed catch ${processedCommand.id} for ${username}`
     )
