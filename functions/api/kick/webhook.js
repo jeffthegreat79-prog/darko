@@ -160,12 +160,13 @@ const commandInsert = await env.FISH_DB
       command,
       catch_name,
       catch_rarity,
+      catch_type,
       catch_weight,
       catch_coins,
       catch_icon,
       catch_is_trophy
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   .bind(
     kickMessageId,
@@ -173,6 +174,7 @@ const commandInsert = await env.FISH_DB
     message,
     serverCatch.name,
     serverCatch.rarity,
+    serverCatch.type || 'fish',
     serverCatch.weight,
     serverCatch.coins,
     serverCatch.icon,
@@ -236,6 +238,11 @@ await env.FISH_DB
     .first()
 
   if (processedCommand) {
+    const countsForBiggest =
+  !serverCatch.type || serverCatch.type === 'fish'
+
+const recordWeight = countsForBiggest ? serverCatch.weight : 0
+const recordSpecies = countsForBiggest ? serverCatch.name : ''
     await env.FISH_DB
       .prepare(`
         INSERT INTO players (
@@ -270,11 +277,19 @@ await env.FISH_DB
       .bind(
         username,
         serverCatch.coins,
-        serverCatch.weight,
-        serverCatch.name
+        recordWeight,
+recordSpecies
       )
       .run()
+let catchMessage
 
+if (serverCatch.type === 'junk') {
+  catchMessage = `🗑️ ${username} fished up a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+} else if (serverCatch.type === 'treasure') {
+  catchMessage = `✨ ${username} found a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+} else {
+  catchMessage = `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+}
     await sendKickChatMessage(
       env,
       `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
@@ -298,7 +313,7 @@ if (message.toLowerCase().startsWith('!buybait ')) {
   if (!bait) {
   await sendKickChatMessage(
     env,
-    `🎣 ${username}, bait options are: Worms, Minnows, Crickets, Golden Lures`
+   catchMessage
   )
 
   console.log(`Unknown bait requested by ${username}: ${baitKey}`)
