@@ -322,6 +322,8 @@ export const BAITS = {
   },
 }
 export function getRandomFish(rareBonus = 0) {
+    const forcedCatch = fishTable.find((fish) => fish.name === 'Old Vape')
+  if (forcedCatch) return forcedCatch
   const rarityBoostLevel = {
     Common: 0,
     Uncommon: 1,
