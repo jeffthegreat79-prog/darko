@@ -11,8 +11,4 @@ createRoot(document.getElementById('root')).render(
     {isDinkoOverlay ? <DinkoOverlay /> : <App />}
   </StrictMode>,
 )
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+
