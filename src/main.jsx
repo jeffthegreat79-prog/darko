@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import DinkoOverlay from './DinkoOverlay.jsx'
 const isDinkoOverlay =
-  window.location.pathname === '/dinko-overlay'
+  window.location.pathname.startsWith('/dinko-overlay')
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
