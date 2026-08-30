@@ -1,0 +1,195 @@
+.dinko-overlay-body {
+  margin: 0;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+.dinko-overlay {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.dinko-board {
+  width: 720px;
+  padding: 22px;
+  border-radius: 28px;
+  border: 2px solid rgba(63, 230, 255, 0.55);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 24, 38, 0.96),
+      rgba(2, 10, 18, 0.96)
+    );
+  box-shadow:
+    0 0 35px rgba(0, 210, 255, 0.22),
+    inset 0 0 30px rgba(0, 160, 220, 0.08);
+}
+
+.dinko-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.dinko-header h1 {
+  margin: 0;
+  font-size: 46px;
+  letter-spacing: 8px;
+  color: white;
+  text-shadow:
+    0 0 8px rgba(0, 225, 255, 0.9),
+    0 0 20px rgba(0, 225, 255, 0.55);
+}
+
+.dinko-header p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  letter-spacing: 5px;
+  color: #57eaff;
+}
+
+.dinko-playfield {
+  position: relative;
+  height: 650px;
+}
+
+.dinko-drop-zone {
+  height: 55px;
+}
+
+.dinko-puck {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #ff8898 0%,
+      #ef405a 45%,
+      #a9122d 100%
+    );
+
+  box-shadow:
+    0 0 12px rgba(255, 60, 90, 0.7),
+    0 0 24px rgba(255, 60, 90, 0.3);
+
+  transform: translate(-50%, -50%);
+
+  transition:
+    left 280ms cubic-bezier(0.25, 0.8, 0.4, 1),
+    top 280ms linear;
+
+  z-index: 20;
+  pointer-events: none;
+}
+
+.dinko-puck.active {
+  box-shadow:
+    0 0 15px rgba(255, 60, 90, 0.95),
+    0 0 32px rgba(255, 60, 90, 0.45);
+}
+
+.dinko-puck-name {
+  position: absolute;
+  left: 50%;
+  bottom: 43px;
+
+  transform: translateX(-50%);
+
+  padding: 4px 9px;
+  border-radius: 999px;
+
+  background: rgba(2, 10, 18, 0.88);
+
+  border: 1px solid rgba(87, 234, 255, 0.45);
+
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+
+  box-shadow: 0 0 10px rgba(0, 220, 255, 0.2);
+}
+
+.dinko-slot {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.dinko-slot.winner {
+  transform: translateY(-7px) scale(1.08);
+
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.75),
+    0 0 28px rgba(87, 234, 255, 0.6);
+}
+
+.dinko-pegs {
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.dinko-peg-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 62px;
+}
+
+.dinko-peg {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #dffbff;
+  box-shadow:
+    0 0 8px rgba(87, 234, 255, 0.9),
+    0 0 16px rgba(87, 234, 255, 0.4);
+}
+
+.dinko-slots {
+  height: 76px;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 5px;
+}
+
+.dinko-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px 9px 15px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 18px;
+  font-weight: 900;
+  color: white;
+}
+
+.dinko-slot.jackpot {
+  background: rgba(255, 191, 0, 0.35);
+  box-shadow: 0 0 15px rgba(255, 191, 0, 0.35);
+}
+
+.dinko-slot.high {
+  background: rgba(191, 75, 255, 0.3);
+}
+
+.dinko-slot.safe {
+  background: rgba(0, 220, 160, 0.28);
+}
+
+.dinko-slot.low {
+  background: rgba(0, 140, 255, 0.25);
+}
+
+.dinko-slot.zero {
+  background: rgba(255, 70, 70, 0.35);
+}

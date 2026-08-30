@@ -7,8 +7,12 @@ const isDinkoOverlay =
   window.location.pathname.startsWith('/dinko-overlay')
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    {isDinkoOverlay ? <DinkoOverlay /> : <App />}
-  </StrictMode>,
+  isDinkoOverlay ? (
+    <DinkoOverlay />
+  ) : (
+    <StrictMode>
+      <App />
+    </StrictMode>
+  ),
 )
 
