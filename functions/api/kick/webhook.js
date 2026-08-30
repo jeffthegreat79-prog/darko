@@ -4,6 +4,7 @@ import {
   RODS,
   BAITS as FISHING_BAITS,
 } from '../../lib/fishing.js'
+import { processDinkoPlay } from '../../lib/dinko.js'
 import { sendKickChatMessage } from '../fish/catch.js'
 const BAITS = {
   worm: { name: 'Worm', replyName: 'Worms', cost: 10 },
@@ -107,7 +108,57 @@ export async function onRequestPost(context) {
     const kickMessageId = body.message_id
 
     console.log('Kick chat message:', body.content)
+if (message === '!dinko' || message.startsWith('!dinko ')) {
+  const parts = message.split(/\s+/)
+  const wager = Number(parts[1])
 
+  if (!Number.isSafeInteger(wager) || wager <= 0) {
+    await sendKickChatMessage(
+      env,
+      `🔴 ${username}, use !dinko followed by a whole-number wager. Example: !dinko 100`
+    )
+
+    return new Response('OK', { status: 200 })
+  }
+
+  const result = await processDinkoPlay(env, {
+    kickMessageId,
+    username,
+    wager,
+  })
+
+  if (!result.success) {
+    if (result.reason === 'insufficient_coins') {
+      await sendKickChatMessage(
+        env,
+        `🪙 ${username}, you don't have enough coins for a ${wager}-coin DINKO drop.`
+      )
+    } else if (result.reason === 'player_not_found') {
+      await sendKickChatMessage(
+        env,
+        `🎣 ${username}, catch a fish first so I can create your player account.`
+      )
+    } else if (result.reason !== 'duplicate') {
+      await sendKickChatMessage(
+        env,
+        `🔴 ${username}, that DINKO drop couldn't be started.`
+      )
+    }
+
+    return new Response('OK', { status: 200 })
+  }
+
+  await sendKickChatMessage(
+    env,
+    `🔴 ${username} dropped ${result.wager} coins into DINKO! Puck incoming...`
+  )
+
+  console.log(
+    `🔴 DINKO queued for ${username}: ${result.wager} coins → ${result.multiplier}x → ${result.payout} payout`
+  )
+
+  return new Response('OK', { status: 200 })
+}
     if (message === '!fish') {
       const now = Math.floor(Date.now() / 1000)
 const cooldownSeconds = 5 * 60
