@@ -15,7 +15,8 @@
 }
 
 .dinko-board {
-  width: 720px;
+    box-sizing: content-box; 
+  width: 900px;
   padding: 22px;
   border-radius: 28px;
   border: 2px solid rgba(63, 230, 255, 0.55);
@@ -54,7 +55,7 @@
 
 .dinko-playfield {
   position: relative;
-  height: 650px;
+  height: 760px;
 }
 
 .dinko-drop-zone {
@@ -80,10 +81,6 @@
     0 0 24px rgba(255, 60, 90, 0.3);
 
   transform: translate(-50%, -50%);
-
-  transition:
-    left 280ms cubic-bezier(0.25, 0.8, 0.4, 1),
-    top 280ms linear;
 
   z-index: 20;
   pointer-events: none;
@@ -132,7 +129,9 @@
 }
 
 .dinko-pegs {
-  height: 500px;
+  height: 600px;
+  padding-top: 30px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -158,7 +157,7 @@
 .dinko-slots {
   height: 76px;
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+ grid-template-columns: repeat(13, 1fr);
   gap: 5px;
 }
 
