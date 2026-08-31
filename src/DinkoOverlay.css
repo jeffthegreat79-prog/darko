@@ -174,23 +174,11 @@
     0 0 10px rgba(0, 0, 0, 0.35);
 }
 
-.dinko-slot.jackpot {
-  background: rgba(255, 191, 0, 0.35);
-  box-shadow: 0 0 15px rgba(255, 191, 0, 0.35);
-}
-
-.dinko-slot.high {
-  background: rgba(191, 75, 255, 0.3);
-}
-
-.dinko-slot.safe {
-  background: rgba(0, 220, 160, 0.28);
-}
-
-.dinko-slot.low {
-  background: rgba(0, 140, 255, 0.25);
-}
-
+.dinko-slot.jackpot,
+.dinko-slot.high,
+.dinko-slot.safe,
+.dinko-slot.low,
 .dinko-slot.zero {
-  background: rgba(255, 70, 70, 0.35);
+  background: rgba(0, 140, 255, 0.28);
+  box-shadow: 0 0 15px rgba(0, 140, 255, 0.35);
 }
