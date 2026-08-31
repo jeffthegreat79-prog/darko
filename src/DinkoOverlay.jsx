@@ -254,18 +254,52 @@ const steering =
 
 
           const timedOut =
-            now - startedAt > 9000
+  now - startedAt > 9000
 
-          const landed =
-            activeBall.position.y > 620 &&
-            Math.abs(activeBall.velocity.y) < 2
+const closeToTarget =
+  Math.abs(activeBall.position.x - targetX) <
+  SLOT_WIDTH * 0.35
 
-          if (landed || timedOut) {
-            setWinningSlot(slotIndex)
+const landed =
+  activeBall.position.y > BOARD_HEIGHT - 100 &&
+  closeToTarget &&
+  Math.abs(activeBall.velocity.y) < 2
 
-            resolve()
-            return
-          }
+if (landed) {
+  setWinningSlot(slotIndex)
+
+  resolve()
+  return
+}
+
+/*
+ * Safety fallback:
+ * if physics takes too long, finish the puck visibly
+ * inside the server-selected winning slot.
+ */
+if (timedOut) {
+  const finalY = BOARD_HEIGHT - 70
+
+  Body.setPosition(activeBall, {
+    x: targetX,
+    y: finalY,
+  })
+
+  Body.setVelocity(activeBall, {
+    x: 0,
+    y: 0,
+  })
+
+  setPuckPosition({
+    x: targetX,
+    y: finalY,
+  })
+
+  setWinningSlot(slotIndex)
+
+  resolve()
+  return
+}
 
           animationFrame =
             requestAnimationFrame(tick)
@@ -446,7 +480,17 @@ const steering =
               )
             )}
           </div>
+{winningSlot !== null && currentPlay && (
+  <div className="dinko-result">
+    <div className="dinko-result-player">
+      {currentPlay.username}
+    </div>
 
+    <div className="dinko-result-multiplier">
+      HIT {slots[winningSlot].multiplier}!
+    </div>
+  </div>
+)}
           <div className="dinko-slots">
             {slots.map((slot, index) => (
               <div

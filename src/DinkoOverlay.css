@@ -166,7 +166,7 @@
   justify-content: center;
   border-radius: 9px 9px 15px 15px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
   color: white;
   text-shadow:
@@ -181,4 +181,33 @@
 .dinko-slot.zero {
   background: rgba(0, 140, 255, 0.28);
   box-shadow: 0 0 15px rgba(0, 140, 255, 0.35);
+}
+.dinko-result {
+  position: absolute;
+  left: 50%;
+  bottom: 195px;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 20;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.dinko-result-player {
+  font-size: 80px;
+  font-weight: 800;
+  color: #0f9ee5;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+.dinko-result-multiplier {
+  font-size: 80px;
+  font-weight: 900;
+  color: #0f9ee5;
+  line-height: 1;
+  text-shadow:
+    0 3px 5px rgba(0, 0, 0, 0.9),
+    0 0 14px rgba(255, 255, 255, 0.65);
 }
