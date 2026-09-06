@@ -202,6 +202,18 @@ if (lastFish) {
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
      const serverCatch = await buildServerCatch(env, username)
+     // TEMP TEST: force a junk catch for DarkoVision
+if (username.toLowerCase() === 'darkovision') {
+  Object.assign(serverCatch, {
+    name: 'Old Brake Rotor',
+    rarity: 'Junk',
+    type: 'junk',
+    weight: 18.4,
+    coins: 5,
+    icon: '⚙️',
+    isTrophy: false,
+  })
+}
 
 const commandInsert = await env.FISH_DB
   .prepare(`
