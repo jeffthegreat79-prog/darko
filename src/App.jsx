@@ -989,6 +989,7 @@ const caughtFish =
         name: serverCatch.name,
         rarity: serverCatch.rarity,
         icon: serverCatch.icon,
+        type: serverCatch.type || 'fish',
         value: serverCatch.coins,
         minWeight: serverCatch.weight,
         maxWeight: serverCatch.weight,
