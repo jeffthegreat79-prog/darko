@@ -1394,7 +1394,13 @@ return () => clearInterval(interval)
 
                <div>
 
-  <p>You caught a</p>
+  <p>
+  {catchResult.type === 'junk'
+    ? 'You fished up a'
+    : catchResult.type === 'treasure'
+      ? 'You found a'
+      : 'You caught a'}
+</p>
 
  {catchResult.isTrophy && (
   <div
