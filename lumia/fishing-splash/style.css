@@ -1,0 +1,592 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+#fishing-effect {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.splash {
+  --effect-scale: 1.15;
+  --ring-color: rgba(90, 210, 255, 0.95);
+  --glow-color: rgba(0, 140, 255, 0.65);
+
+  position: absolute;
+  left: 50%;
+  top: 65%;
+  width: 620px;
+  height: 400px;
+  transform: translate(-50%, -50%) scale(var(--effect-scale));
+  opacity: 0;
+}
+
+.splash.active {
+  opacity: 1;
+}
+
+/* ========================================
+   CATCH TIERS
+   ======================================== */
+
+.splash.effect-junk {
+  --effect-scale: 0.7;
+  --ring-color: rgba(170, 180, 185, 0.8);
+  --glow-color: rgba(100, 110, 115, 0.4);
+}
+
+.splash.effect-common,
+.splash.effect-uncommon {
+  --effect-scale: 1.15;
+}
+
+.splash.effect-rare {
+  --effect-scale: 1.35;
+  --ring-color: rgba(60, 180, 255, 1);
+  --glow-color: rgba(0, 120, 255, 0.8);
+}
+
+.splash.effect-epic {
+  --effect-scale: 1.55;
+  --ring-color: rgba(185, 90, 255, 1);
+  --glow-color: rgba(145, 40, 255, 0.9);
+}
+
+.splash.effect-legendary,
+.splash.effect-treasure {
+  --effect-scale: 1.85;
+  --ring-color: rgba(255, 205, 70, 1);
+  --glow-color: rgba(255, 150, 20, 0.95);
+}
+
+.splash.trophy {
+  filter:
+    drop-shadow(0 0 16px rgba(255, 220, 90, 1))
+    drop-shadow(0 0 35px rgba(255, 160, 30, 0.8));
+}
+
+/* ========================================
+   WATER RIPPLES
+   ======================================== */
+
+.ripple {
+  position: absolute;
+  left: 50%;
+  top: 65%;
+  width: 80px;
+  height: 25px;
+  border: 7px solid var(--ring-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  box-shadow:
+    0 0 12px var(--ring-color),
+    0 0 28px var(--glow-color);
+}
+
+.active .ripple-1 {
+  animation: ripple 1.4s ease-out forwards;
+}
+
+.active .ripple-2 {
+  animation: ripple 1.4s 0.15s ease-out forwards;
+}
+
+.active .ripple-3 {
+  animation: ripple 1.4s 0.3s ease-out forwards;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(4.5);
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   CENTER WATER BURST
+   ======================================== */
+
+.center-splash {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 70px;
+  height: 70px;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(235, 250, 255, 0.98) 0%,
+      var(--ring-color) 40%,
+      rgba(0, 130, 255, 0) 75%
+    );
+
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+.active .center-splash {
+  animation: burst 0.7s ease-out forwards;
+}
+
+@keyframes burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+
+  70% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   WATER DROPLETS
+   ======================================== */
+
+.drop {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 15px;
+  height: 24px;
+
+  background: var(--ring-color);
+  border-radius: 50% 50% 60% 60%;
+
+  box-shadow:
+    0 0 8px var(--ring-color),
+    0 0 16px var(--glow-color);
+
+  opacity: 0;
+}
+
+.active .drop-1 {
+  animation: drop1 0.9s ease-out forwards;
+}
+
+.active .drop-2 {
+  animation: drop2 1s ease-out forwards;
+}
+
+.active .drop-3 {
+  animation: drop3 0.85s ease-out forwards;
+}
+
+.active .drop-4 {
+  animation: drop4 1.05s ease-out forwards;
+}
+
+.active .drop-5 {
+  animation: drop5 0.95s ease-out forwards;
+}
+
+@keyframes drop1 {
+  0% { transform: translate(0, 0) scale(.5); opacity: 1; }
+  100% { transform: translate(-130px, -130px) scale(1); opacity: 0; }
+}
+
+@keyframes drop2 {
+  0% { transform: translate(0, 0) scale(.5); opacity: 1; }
+  100% { transform: translate(-70px, -180px) scale(.8); opacity: 0; }
+}
+
+@keyframes drop3 {
+  0% { transform: translate(0, 0) scale(.5); opacity: 1; }
+  100% { transform: translate(25px, -195px) scale(1.1); opacity: 0; }
+}
+
+@keyframes drop4 {
+  0% { transform: translate(0, 0) scale(.5); opacity: 1; }
+  100% { transform: translate(95px, -160px) scale(.9); opacity: 0; }
+}
+
+@keyframes drop5 {
+  0% { transform: translate(0, 0) scale(.5); opacity: 1; }
+  100% { transform: translate(145px, -100px) scale(.7); opacity: 0; }
+}
+
+/* ========================================
+   CATCH TEXT
+   ======================================== */
+
+.catch-text {
+  position: absolute;
+  left: 50%;
+  top: 2%;
+  width: 800px;
+  max-width: 90vw;
+
+  transform: translateX(-50%) translateY(20px);
+  text-align: center;
+
+  font-family: Arial, sans-serif;
+  font-weight: 900;
+  opacity: 0;
+}
+
+.active .catch-text {
+  animation: catchText 4s ease-out forwards;
+}
+
+.catch-user {
+  font-size: 34px;
+  color: white;
+  text-shadow:
+    0 2px 3px black,
+    0 0 12px var(--glow-color);
+}
+
+.catch-name {
+  margin-top: 5px;
+  font-size: 50px;
+  color: var(--ring-color);
+
+  text-shadow:
+    0 3px 4px black,
+    0 0 18px var(--glow-color);
+}
+
+.catch-detail {
+  margin-top: 5px;
+  font-size: 25px;
+  color: white;
+  text-shadow: 0 2px 3px black;
+}
+
+@keyframes catchText {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(25px) scale(.9);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-15px) scale(1.03);
+  }
+}
+
+/* ========================================
+   SPECIAL CATCH EFFECTS
+   ======================================== */
+
+.special-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* EPIC SHOCKWAVE */
+
+.epic-shockwave {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 120px;
+  height: 120px;
+
+  border: 10px solid rgba(190, 90, 255, 0.95);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+
+  box-shadow:
+    0 0 25px rgba(180, 70, 255, 1),
+    inset 0 0 25px rgba(180, 70, 255, 0.8);
+}
+
+.effect-epic.active .epic-shockwave {
+  animation: epicShockwave 1.4s ease-out forwards;
+}
+
+@keyframes epicShockwave {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(4.5);
+    opacity: 0;
+  }
+}
+
+/* LEGENDARY / TREASURE BURST */
+
+.legendary-burst {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 180px;
+  height: 180px;
+
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 255, 220, 1) 0%,
+      rgba(255, 220, 80, 0.95) 20%,
+      rgba(255, 150, 20, 0.6) 45%,
+      rgba(255, 120, 0, 0) 75%
+    );
+}
+
+.effect-legendary.active .legendary-burst,
+.effect-treasure.active .legendary-burst {
+  animation: legendaryBurst 1.5s ease-out forwards;
+}
+
+@keyframes legendaryBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+
+  45% {
+    transform: translate(-50%, -50%) scale(2.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* GOLD SPARKLES */
+
+.spark {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 13px;
+  height: 13px;
+
+  background: rgba(255, 230, 100, 1);
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 8px rgba(255, 240, 150, 1),
+    0 0 18px rgba(255, 170, 30, 0.9);
+
+  opacity: 0;
+}
+
+.effect-legendary.active .spark,
+.effect-treasure.active .spark,
+.trophy.active .spark {
+  animation-duration: 1.7s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.effect-legendary.active .spark-1,
+.effect-treasure.active .spark-1,
+.trophy.active .spark-1 {
+  animation-name: spark1;
+}
+
+.effect-legendary.active .spark-2,
+.effect-treasure.active .spark-2,
+.trophy.active .spark-2 {
+  animation-name: spark2;
+}
+
+.effect-legendary.active .spark-3,
+.effect-treasure.active .spark-3,
+.trophy.active .spark-3 {
+  animation-name: spark3;
+}
+
+.effect-legendary.active .spark-4,
+.effect-treasure.active .spark-4,
+.trophy.active .spark-4 {
+  animation-name: spark4;
+}
+
+.effect-legendary.active .spark-5,
+.effect-treasure.active .spark-5,
+.trophy.active .spark-5 {
+  animation-name: spark5;
+}
+
+.effect-legendary.active .spark-6,
+.effect-treasure.active .spark-6,
+.trophy.active .spark-6 {
+  animation-name: spark6;
+}
+
+.effect-legendary.active .spark-7,
+.effect-treasure.active .spark-7,
+.trophy.active .spark-7 {
+  animation-name: spark7;
+}
+
+.effect-legendary.active .spark-8,
+.effect-treasure.active .spark-8,
+.trophy.active .spark-8 {
+  animation-name: spark8;
+}
+
+@keyframes spark1 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(-220px,-160px) scale(1.2); opacity:0; }
+}
+
+@keyframes spark2 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(-120px,-230px) scale(.8); opacity:0; }
+}
+
+@keyframes spark3 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(0,-260px) scale(1.1); opacity:0; }
+}
+
+@keyframes spark4 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(130px,-220px) scale(.9); opacity:0; }
+}
+
+@keyframes spark5 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(220px,-140px) scale(1.2); opacity:0; }
+}
+
+@keyframes spark6 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(-190px,60px) scale(.7); opacity:0; }
+}
+
+@keyframes spark7 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(0,100px) scale(1); opacity:0; }
+}
+
+@keyframes spark8 {
+  0% { transform: translate(0,0) scale(.3); opacity:1; }
+  100% { transform: translate(190px,60px) scale(.8); opacity:0; }
+}
+
+/* TROPHY POP */
+
+.trophy-pop {
+  position: absolute;
+  left: 50%;
+  top: 32%;
+  font-size: 90px;
+
+  transform: translate(-50%, -50%) scale(0) rotate(-15deg);
+  opacity: 0;
+
+  filter:
+    drop-shadow(0 0 12px rgba(255, 220, 70, 1))
+    drop-shadow(0 0 30px rgba(255, 150, 20, 0.9));
+}
+
+.trophy.active .trophy-pop {
+  animation: trophyPop 2.2s ease-out forwards;
+}
+
+@keyframes trophyPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-15deg);
+    opacity: 0;
+  }
+
+  20% {
+    transform: translate(-50%, -50%) scale(1.35) rotate(8deg);
+    opacity: 1;
+  }
+
+  35% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -70%) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* JUNK PLOP */
+
+.junk-plop {
+  position: absolute;
+  left: 50%;
+  top: 57%;
+  font-size: 55px;
+
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  filter: grayscale(1);
+}
+
+.effect-junk.active .junk-plop {
+  animation: junkPlop 1.5s ease-out forwards;
+}
+
+@keyframes junkPlop {
+  0% {
+    transform: translate(-50%, -100%) scale(.4) rotate(-20deg);
+    opacity: 0;
+  }
+
+  25% {
+    transform: translate(-50%, -50%) scale(1.15) rotate(10deg);
+    opacity: 1;
+  }
+
+  45% {
+    transform: translate(-50%, -40%) scale(.9) rotate(-8deg);
+  }
+
+  65% {
+    transform: translate(-50%, -50%) scale(1) rotate(4deg);
+  }
+
+  100% {
+    transform: translate(-50%, -20%) scale(.75);
+    opacity: 0;
+  }
+}
