@@ -202,19 +202,7 @@ if (lastFish) {
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
      const serverCatch = await buildServerCatch(env, username)
-    // TEMP TEST: force a treasure catch for DarkoVision
-if (username.toLowerCase() === 'darkovision') {
-  Object.assign(serverCatch, {
-    name: 'Waterlogged Pokémon Card',
-    rarity: 'Treasure',
-    type: 'treasure',
-    weight: 0.1,
-    coins: 100,
-    icon: '🃏',
-    isTrophy: false,
-  })
-}
-
+   
 const commandInsert = await env.FISH_DB
   .prepare(`
     INSERT OR IGNORE INTO fish_commands (
