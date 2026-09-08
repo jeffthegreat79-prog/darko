@@ -80,7 +80,22 @@ function buildCatchText(catchData) {
       `TROPHY • ${catchDetail.textContent}`;
   }
 }
+function playOverlaySound(url, volume = 1) {
+  if (!url) {
+    return;
+  }
 
+  try {
+    const audio = new Audio(url);
+    audio.volume = volume;
+
+    audio.play().catch((error) => {
+      console.error(`Audio playback error: ${error.message}`);
+    });
+  } catch (error) {
+    console.error(`Audio setup error: ${error.message}`);
+  }
+}
 function playCatchEffect(catchData) {
   effectPlaying = true;
 
@@ -104,11 +119,18 @@ function playCatchEffect(catchData) {
 
   buildCatchText(catchData);
 
-  // Force animations to restart
-  splash.getBoundingClientRect();
+  // Start reel sound immediately
+  playOverlaySound(Overlay.data.reelSound, 1);
 
-  splash.classList.add("active");
+  // Reel first, then splash sound + visual together
+  setTimeout(() => {
+    playOverlaySound(Overlay.data.splashSound, 1);
 
+    splash.getBoundingClientRect();
+    splash.classList.add("active");
+  }, 1450);
+
+  // 1.45 sec reel delay + 4.2 sec visible alert
   setTimeout(() => {
     splash.classList.remove("active");
 
@@ -116,7 +138,7 @@ function playCatchEffect(catchData) {
       effectPlaying = false;
       playNextCatch();
     }, 250);
-  }, 4200);
+  }, 5650);
 }
 
 function playNextCatch() {

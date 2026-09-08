@@ -1,0 +1,12 @@
+{
+  "reelSound": {
+    "type": "soundupload",
+    "label": "Fishing Reel Sound",
+    "accept": "audio/mpeg"
+  },
+  "splashSound": {
+    "type": "soundupload",
+    "label": "Water Splash Sound",
+    "accept": "audio/mpeg"
+  }
+}
