@@ -1,3 +1,15 @@
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders,
+  })
+}
 export async function onRequestGet(context) {
   const { request, env } = context
 
@@ -11,7 +23,10 @@ export async function onRequestGet(context) {
           success: false,
           error: 'Username is required',
         },
-        { status: 400 }
+        {
+  status: 400,
+  headers: corsHeaders,
+}
       )
     }
 
@@ -22,6 +37,7 @@ export async function onRequestGet(context) {
           username,
           catch_name,
           catch_rarity,
+          catch_type,
           catch_weight,
           catch_coins,
           catch_icon,
@@ -42,6 +58,7 @@ export async function onRequestGet(context) {
       id: row.id,
       name: row.catch_name,
       rarity: row.catch_rarity,
+      type: row.catch_type || 'fish',
       weight: Number(row.catch_weight),
       value: Number(row.catch_coins),
       icon: row.catch_icon,
@@ -59,10 +76,11 @@ export async function onRequestGet(context) {
         catches,
       },
       {
-        headers: {
-          'Cache-Control': 'no-store',
-        },
-      }
+  headers: {
+    ...corsHeaders,
+    'Cache-Control': 'no-store',
+  },
+}
     )
   } catch (error) {
     console.error('Fish history error:', error)
@@ -72,7 +90,10 @@ export async function onRequestGet(context) {
         success: false,
         error: 'Could not load fish history',
       },
-      { status: 500 }
+     {
+  status: 500,
+  headers: corsHeaders,
+}
     )
   }
 }
