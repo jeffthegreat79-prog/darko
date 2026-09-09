@@ -1,20 +1,78 @@
-export async function onRequestPost({ request, env }) {
-  try {
-    const body = await request.json()
+function getCookie(request, name) {
+  const cookieHeader = request.headers.get('Cookie') || ''
+  const cookies = cookieHeader.split(';').map((cookie) => cookie.trim())
 
-    const username = String(body.username ?? '').trim()
-    const itemType = body.itemType
-    const itemName = String(body.itemName ?? '').trim()
+  for (const cookie of cookies) {
+    const [key, ...valueParts] = cookie.split('=')
 
-    if (!username || !itemType || !itemName) {
-      return Response.json(
-        {
-          success: false,
-          error: 'Missing username, itemType, or itemName',
-        },
-        { status: 400 }
-      )
+    if (key === name) {
+      return valueParts.join('=')
     }
+  }
+
+  return null
+}
+export async function onRequestPost({ request, env }) {
+ try {
+  const sessionId = getCookie(request, 'kick_viewer_session')
+
+  if (!sessionId) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Connect Kick before equipping fishing gear',
+      },
+      { status: 401 }
+    )
+  }
+
+  const session = await env.FISH_DB
+    .prepare(`
+      SELECT
+        username,
+        expires_at
+      FROM kick_viewer_sessions
+      WHERE session_id = ?
+    `)
+    .bind(sessionId)
+    .first()
+
+  if (!session || Number(session.expires_at) <= Date.now()) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Kick viewer session is invalid or expired',
+      },
+      { status: 401 }
+    )
+  }
+
+  const username = String(session.username ?? '').trim()
+
+  if (!username) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Kick viewer session has no username',
+      },
+      { status: 401 }
+    )
+  }
+
+  const body = await request.json()
+
+  const itemType = body.itemType
+  const itemName = String(body.itemName ?? '').trim()
+
+  if (!itemType || !itemName) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Missing itemType or itemName',
+      },
+      { status: 400 }
+    )
+  }
 
     if (itemType !== 'rod' && itemType !== 'bait') {
       return Response.json(

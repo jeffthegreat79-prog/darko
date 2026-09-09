@@ -13,23 +13,66 @@ const BAITS = {
 }
 
 export async function onRequestPost({ request, env }) {
-  try {
-    const body = await request.json()
+ try {
+  const sessionId = getCookie(request, 'kick_viewer_session')
 
-    const username = String(body.username ?? '').trim()
-    const itemType = body.itemType
-    const itemName = body.itemName
+  if (!sessionId) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Connect Kick before using the fishing shop',
+      },
+      { status: 401 }
+    )
+  }
 
-    if (!username || !itemType || !itemName) {
-      return Response.json(
-        {
-          success: false,
-          error: 'Missing username, itemType, or itemName',
-        },
-        { status: 400 }
-      )
-    }
+  const session = await env.FISH_DB
+    .prepare(`
+      SELECT
+        username,
+        expires_at
+      FROM kick_viewer_sessions
+      WHERE session_id = ?
+    `)
+    .bind(sessionId)
+    .first()
 
+  if (!session || Number(session.expires_at) <= Date.now()) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Kick viewer session is invalid or expired',
+      },
+      { status: 401 }
+    )
+  }
+
+  const username = String(session.username ?? '').trim()
+
+  if (!username) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Kick viewer session has no username',
+      },
+      { status: 401 }
+    )
+  }
+
+  const body = await request.json()
+
+  const itemType = body.itemType
+  const itemName = body.itemName
+
+  if (!itemType || !itemName) {
+    return Response.json(
+      {
+        success: false,
+        error: 'Missing itemType or itemName',
+      },
+      { status: 400 }
+    )
+  }
     const catalog =
       itemType === 'rod'
         ? RODS

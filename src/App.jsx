@@ -384,9 +384,10 @@ useEffect(() => {
       })
 
       if (!response.ok) {
-        setKickConnected(false)
-        return
-      }
+  setKickConnected(false)
+  setKickPlayerStats(null)
+  return
+}
 
       const data = await response.json()
       const username = data.viewer?.username
@@ -1082,8 +1083,15 @@ if (completedCatch.username) {
     throw new Error(await response.text())
   }
 
+ const loggedInUsername = kickPlayerStats?.username
+
+if (
+  loggedInUsername &&
+  completedCatch.username &&
+  loggedInUsername.toLowerCase() === completedCatch.username.toLowerCase()
+) {
   const playerResponse = await fetch(
-    `/api/player?username=${encodeURIComponent(completedCatch.username)}`,
+    `/api/player?username=${encodeURIComponent(loggedInUsername)}`,
     { cache: 'no-store' }
   )
 
@@ -1093,6 +1101,7 @@ if (completedCatch.username) {
 
   const playerData = await playerResponse.json()
   setKickPlayerStats(playerData.player)
+}
 })
 .catch((error) => {
   console.error('Failed to save or refresh Kick catch:', error)
@@ -1200,9 +1209,16 @@ console.log(`Claimed fish command ${latest.id}`)
     `🎣 Kick cast triggered by ${latest.username}`
   )
 
-  try {
+ try {
+  const loggedInUsername = kickPlayerStats?.username
+
+  if (
+    loggedInUsername &&
+    latest.username &&
+    loggedInUsername.toLowerCase() === latest.username.toLowerCase()
+  ) {
     const playerResponse = await fetch(
-      `/api/player?username=${encodeURIComponent(latest.username)}`,
+      `/api/player?username=${encodeURIComponent(loggedInUsername)}`,
       {
         cache: 'no-store',
       }
@@ -1214,13 +1230,14 @@ console.log(`Claimed fish command ${latest.id}`)
       setKickPlayerStats(playerData.player)
 
       console.log(
-        '🎣 Loaded Kick player stats:',
+        '🎣 Refreshed logged-in Kick player stats:',
         playerData.player
       )
     }
-  } catch (error) {
-    console.error('Failed to load Kick player stats:', error)
   }
+} catch (error) {
+  console.error('Failed to refresh Kick player stats:', error)
+}
 
   castLineRef.current?.(
   latest.username,
