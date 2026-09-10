@@ -159,7 +159,46 @@ engine.gravity.scale = 0.001
         activeBall = null
       }
     }
+function playJackpotSound() {
+  try {
+    const AudioContext =
+      window.AudioContext || window.webkitAudioContext
 
+    const audioCtx = new AudioContext()
+    const now = audioCtx.currentTime
+
+    const notes = [523.25, 659.25, 783.99, 1046.5]
+
+    notes.forEach((frequency, index) => {
+      const oscillator = audioCtx.createOscillator()
+      const gain = audioCtx.createGain()
+
+      oscillator.type = 'sine'
+      oscillator.frequency.value = frequency
+
+      oscillator.connect(gain)
+      gain.connect(audioCtx.destination)
+
+      const start = now + index * 0.1
+
+      gain.gain.setValueAtTime(0, start)
+      gain.gain.linearRampToValueAtTime(0.22, start + 0.02)
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        start + 0.35
+      )
+
+      oscillator.start(start)
+      oscillator.stop(start + 0.4)
+    })
+
+    setTimeout(() => {
+      audioCtx.close()
+    }, 1200)
+  } catch (error) {
+    console.error('Jackpot sound failed:', error)
+  }
+}
     function runPhysics(play) {
       return new Promise((resolve) => {
         removeBall()
@@ -266,7 +305,11 @@ const landed =
   Math.abs(activeBall.velocity.y) < 2
 
 if (landed) {
-  setWinningSlot(slotIndex)
+  if (slots[slotIndex]?.multiplier === '10x') {
+  playJackpotSound()
+}
+
+setWinningSlot(slotIndex)
 
   resolve()
   return
@@ -295,7 +338,11 @@ if (timedOut) {
     y: finalY,
   })
 
-  setWinningSlot(slotIndex)
+  if (slots[slotIndex]?.multiplier === '10x') {
+  playJackpotSound()
+}
+
+setWinningSlot(slotIndex)
 
   resolve()
   return
@@ -481,13 +528,21 @@ if (timedOut) {
             )}
           </div>
 {winningSlot !== null && currentPlay && (
-  <div className="dinko-result">
+  <div
+    className={`dinko-result ${
+      slots[winningSlot].multiplier === '10x'
+        ? 'dinko-result-jackpot'
+        : ''
+    }`}
+  >
     <div className="dinko-result-player">
       {currentPlay.username}
     </div>
 
     <div className="dinko-result-multiplier">
-      HIT {slots[winningSlot].multiplier}!
+      {slots[winningSlot].multiplier === '10x'
+        ? 'JACKPOT! 10x'
+        : `HIT ${slots[winningSlot].multiplier}!`}
     </div>
   </div>
 )}

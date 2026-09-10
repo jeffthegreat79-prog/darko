@@ -1,13 +1,17 @@
 export const DINKO_SLOTS = [
-  { index: 0, multiplier: 5, weight: 2 },
-  { index: 1, multiplier: 2, weight: 5 },
-  { index: 2, multiplier: 1, weight: 15 },
-  { index: 3, multiplier: 0.5, weight: 18 },
-  { index: 4, multiplier: 0, weight: 20 },
-  { index: 5, multiplier: 0.5, weight: 18 },
-  { index: 6, multiplier: 1, weight: 15 },
-  { index: 7, multiplier: 2, weight: 5 },
-  { index: 8, multiplier: 5, weight: 2 },
+  { index: 0,  multiplier: 10,  weight: 10 },
+  { index: 1,  multiplier: 5,   weight: 30 },
+  { index: 2,  multiplier: 3,   weight: 80 },
+  { index: 3,  multiplier: 1.5, weight: 200 },
+  { index: 4,  multiplier: 1,   weight: 400 },
+  { index: 5,  multiplier: 0.8, weight: 680 },
+  { index: 6,  multiplier: 0.5, weight: 1200 },
+  { index: 7,  multiplier: 0.8, weight: 680 },
+  { index: 8,  multiplier: 1,   weight: 400 },
+  { index: 9,  multiplier: 1.5, weight: 200 },
+  { index: 10, multiplier: 3,   weight: 80 },
+  { index: 11, multiplier: 5,   weight: 30 },
+  { index: 12, multiplier: 10,  weight: 10 },
 ]
 
 export function rollDinko(wager) {
