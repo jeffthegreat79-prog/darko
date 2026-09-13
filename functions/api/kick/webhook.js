@@ -161,7 +161,7 @@ if (message === '!dinko' || message.startsWith('!dinko ')) {
 }
     if (message === '!fish') {
       const now = Math.floor(Date.now() / 1000)
-const cooldownSeconds = 5 * 60
+const cooldownSeconds = 3 * 60
 
 const lastFish = await env.FISH_DB
   .prepare(`
