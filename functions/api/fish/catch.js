@@ -170,6 +170,9 @@ if (!processedCommand) {
     commandId,
   })
 }
+const countsForBiggest = catchType === 'fish'
+const recordWeight = countsForBiggest ? weight : 0
+const recordSpecies = countsForBiggest ? species : ''
     await env.FISH_DB
       .prepare(`
         INSERT INTO players (
@@ -201,11 +204,20 @@ if (!processedCommand) {
 
           updated_at = CURRENT_TIMESTAMP
       `)
-      .bind(username, coins, weight, species)
+      .bind(username, coins, recordWeight, recordSpecies)
       .run()
+      let catchMessage
+
+if (catchType === 'junk') {
+  catchMessage = `🗑️ ${username} fished up a ${weight.toFixed(1)} lb ${species}! +${coins} coins`
+} else if (catchType === 'treasure') {
+  catchMessage = `✨ ${username} found a ${weight.toFixed(1)} lb ${species}! +${coins} coins`
+} else {
+  catchMessage = `🎣 ${username} caught a ${weight.toFixed(1)} lb ${species}! +${coins} coins`
+}
 await sendKickChatMessage(
   env,
-  `🎣 ${username} caught a ${weight.toFixed(1)} lb ${species}! +${coins} coins`
+ catchMessage
 )
     return Response.json({
       success: true,
@@ -213,6 +225,7 @@ await sendKickChatMessage(
       species,
       weight,
       coins,
+      type: catchType,
     })
   } catch (error) {
     console.error('Fish catch save error:', error)

@@ -41,10 +41,10 @@ export default function DinkoOverlay() {
   const busyRef = useRef(false)
 
   useEffect(() => {
-    document.body.classList.add('dinko-overlay-body')
+    document.body.classList.add('plinko-overlay-body')
 
     return () => {
-      document.body.classList.remove('dinko-overlay-body')
+      document.body.classList.remove('plinko-overlay-body')
     }
   }, [])
 
@@ -482,18 +482,18 @@ setWinningSlot(slotIndex)
   }, [])
 
   return (
-    <main className="dinko-overlay">
-      <section className="dinko-board">
-        <div className="dinko-header">
-          <h1>DINKO</h1>
+    <main className="plinko-overlay">
+      <section className="plinko-board">
+        <div className="plinko-header">
+          <h1>plinko</h1>
           <p>DROP ZONE</p>
         </div>
 
-        <div className="dinko-playfield">
-          <div className="dinko-drop-zone" />
+        <div className="plinko-playfield">
+          <div className="plinko-drop-zone" />
 
           <div
-            className={`dinko-puck ${
+            className={`plinko-puck ${
               currentPlay ? 'active' : 'idle'
             }`}
             style={{
@@ -501,25 +501,22 @@ setWinningSlot(slotIndex)
               top: `${puckPosition.y}px`,
             }}
           >
-            {currentPlay && (
-              <span className="dinko-puck-name">
-                {currentPlay.username}
-              </span>
-            )}
+            
+           
           </div>
 
-          <div className="dinko-pegs">
+          <div className="plinko-pegs">
             {pegRows.map(
               (count, rowIndex) => (
                 <div
-                  className="dinko-peg-row"
+                  className="plinko-peg-row"
                   key={`row-${rowIndex}`}
                 >
                   {Array.from({
                     length: count,
                   }).map((_, pegIndex) => (
                     <span
-                      className="dinko-peg"
+                      className="plinko-peg"
                       key={`peg-${rowIndex}-${pegIndex}`}
                     />
                   ))}
@@ -529,27 +526,27 @@ setWinningSlot(slotIndex)
           </div>
 {winningSlot !== null && currentPlay && (
   <div
-    className={`dinko-result ${
+    className={`plinko-result ${
       slots[winningSlot].multiplier === '10x'
-        ? 'dinko-result-jackpot'
+        ? 'plinko-result-jackpot'
         : ''
     }`}
   >
-    <div className="dinko-result-player">
+    <div className="plinko-result-player">
       {currentPlay.username}
     </div>
 
-    <div className="dinko-result-multiplier">
+    <div className="plinko-result-multiplier">
       {slots[winningSlot].multiplier === '10x'
         ? 'JACKPOT! 10x'
         : `HIT ${slots[winningSlot].multiplier}!`}
     </div>
   </div>
 )}
-          <div className="dinko-slots">
+          <div className="plinko-slots">
             {slots.map((slot, index) => (
               <div
-                className={`dinko-slot ${slot.className} ${
+                className={`plinko-slot ${slot.className} ${
                   winningSlot === index
                     ? 'winner'
                     : ''

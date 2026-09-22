@@ -1,0 +1,19 @@
+[1mdiff --git a/src/App.jsx b/src/App.jsx[m
+[1mindex 0c26a5a..509838a 100644[m
+[1m--- a/src/App.jsx[m
+[1m+++ b/src/App.jsx[m
+[36m@@ -1394,7 +1394,13 @@[m [mreturn () => clearInterval(interval)[m
+ [m
+                <div>[m
+ [m
+[31m-  <p>You caught a</p>[m
+[32m+[m[32m  <p>[m
+[32m+[m[32m  {catchResult.type === 'junk'[m
+[32m+[m[32m    ? 'You fished up a'[m
+[32m+[m[32m    : catchResult.type === 'treasure'[m
+[32m+[m[32m      ? 'You found a'[m
+[32m+[m[32m      : 'You caught a'}[m
+[32m+[m[32m</p>[m
+ [m
+  {catchResult.isTrophy && ([m
+   <div[m

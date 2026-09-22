@@ -1,0 +1,12 @@
+[1mdiff --git a/src/App.jsx b/src/App.jsx[m
+[1mindex 91c13d1..0c26a5a 100644[m
+[1m--- a/src/App.jsx[m
+[1m+++ b/src/App.jsx[m
+[36m@@ -989,6 +989,7 @@[m [mconst caughtFish =[m
+         name: serverCatch.name,[m
+         rarity: serverCatch.rarity,[m
+         icon: serverCatch.icon,[m
+[32m+[m[32m        type: serverCatch.type || 'fish',[m
+         value: serverCatch.coins,[m
+         minWeight: serverCatch.weight,[m
+         maxWeight: serverCatch.weight,[m
