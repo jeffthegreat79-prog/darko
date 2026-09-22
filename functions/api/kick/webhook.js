@@ -108,14 +108,14 @@ export async function onRequestPost(context) {
     const kickMessageId = body.message_id
 
     console.log('Kick chat message:', body.content)
-if (message === '!dinko' || message.startsWith('!dinko ')) {
+if (message === '!plinko' || message.startsWith('!plinko ')) {
   const parts = message.split(/\s+/)
   const wager = Number(parts[1])
 
   if (!Number.isSafeInteger(wager) || wager <= 0) {
     await sendKickChatMessage(
       env,
-      `🔴 ${username}, use !dinko followed by a whole-number wager. Example: !dinko 100`
+      `🔴 ${username}, use !plinko followed by a whole-number wager. Example: !dinko 100`
     )
 
     return new Response('OK', { status: 200 })
