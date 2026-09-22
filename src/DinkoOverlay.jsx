@@ -41,10 +41,10 @@ export default function DinkoOverlay() {
   const busyRef = useRef(false)
 
   useEffect(() => {
-    document.body.classList.add('plinko-overlay-body')
+    document.body.classList.add('dinko-overlay-body')
 
     return () => {
-      document.body.classList.remove('plinko-overlay-body')
+      document.body.classList.remove('dinko-overlay-body')
     }
   }, [])
 
@@ -482,18 +482,18 @@ setWinningSlot(slotIndex)
   }, [])
 
   return (
-    <main className="plinko-overlay">
-      <section className="plinko-board">
-        <div className="plinko-header">
+    <main className="dinko-overlay">
+      <section className="dinko-board">
+        <div className="dinko-header">
           <h1>plinko</h1>
           <p>DROP ZONE</p>
         </div>
 
-        <div className="plinko-playfield">
-          <div className="plinko-drop-zone" />
+        <div className="dinko-playfield">
+          <div className="dinko-drop-zone" />
 
           <div
-            className={`plinko-puck ${
+            className={`dinko-puck ${
               currentPlay ? 'active' : 'idle'
             }`}
             style={{
@@ -505,18 +505,18 @@ setWinningSlot(slotIndex)
            
           </div>
 
-          <div className="plinko-pegs">
+          <div className="dinko-pegs">
             {pegRows.map(
               (count, rowIndex) => (
                 <div
-                  className="plinko-peg-row"
+                  className="dinko-peg-row"
                   key={`row-${rowIndex}`}
                 >
                   {Array.from({
                     length: count,
                   }).map((_, pegIndex) => (
                     <span
-                      className="plinko-peg"
+                      className="dinko-peg"
                       key={`peg-${rowIndex}-${pegIndex}`}
                     />
                   ))}
@@ -526,27 +526,27 @@ setWinningSlot(slotIndex)
           </div>
 {winningSlot !== null && currentPlay && (
   <div
-    className={`plinko-result ${
+    className={`dinko-result ${
       slots[winningSlot].multiplier === '10x'
-        ? 'plinko-result-jackpot'
+        ? 'dinko-result-jackpot'
         : ''
     }`}
   >
-    <div className="plinko-result-player">
+    <div className="dinko-result-player">
       {currentPlay.username}
     </div>
 
-    <div className="plinko-result-multiplier">
+    <div className="dinko-result-multiplier">
       {slots[winningSlot].multiplier === '10x'
         ? 'JACKPOT! 10x'
         : `HIT ${slots[winningSlot].multiplier}!`}
     </div>
   </div>
 )}
-          <div className="plinko-slots">
+          <div className="dinko-slots">
             {slots.map((slot, index) => (
               <div
-                className={`plinko-slot ${slot.className} ${
+                className={`dinko-slot ${slot.className} ${
                   winningSlot === index
                     ? 'winner'
                     : ''
