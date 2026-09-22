@@ -12,20 +12,6 @@ function getCookie(request, name) {
 
   return null
 }
-function getCookie(request, name) {
-  const cookieHeader = request.headers.get('Cookie') || ''
-  const cookies = cookieHeader.split(';').map((cookie) => cookie.trim())
-
-  for (const cookie of cookies) {
-    const [key, ...valueParts] = cookie.split('=')
-
-    if (key === name) {
-      return valueParts.join('=')
-    }
-  }
-
-  return null
-}
 export async function onRequestGet({ request, env }) {
   try {
     const sessionId = getCookie(request, 'kick_viewer_session')
