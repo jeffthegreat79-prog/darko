@@ -115,7 +115,7 @@ if (message === '!plinko' || message.startsWith('!plinko ')) {
   if (!Number.isSafeInteger(wager) || wager <= 0) {
     await sendKickChatMessage(
       env,
-      `🔴 ${username}, use !plinko followed by a whole-number wager. Example: !dinko 100`
+      `🔴 ${username}, use !plinko followed by a whole-number wager. Example: !plinko 100`
     )
 
     return new Response('OK', { status: 200 })
