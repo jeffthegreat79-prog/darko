@@ -590,3 +590,44 @@ body {
     opacity: 0;
   }
 }
+/* =========================================
+   CARTOON FISH JUMP
+   ========================================= */
+
+.fish-jump {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 180px;
+  height: auto;
+
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Show fish when fishing animation fires */
+#fishing-effect.active .fish-jump {
+  animation: fishJumpShow 2.2s ease-out forwards;
+}
+
+@keyframes fishJumpShow {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
