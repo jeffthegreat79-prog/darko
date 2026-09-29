@@ -202,7 +202,143 @@ if (lastFish) {
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
      const serverCatch = await buildServerCatch(env, username)
-   
+       // =====================================================
+    // DARKOVISION HOODIE GIVEAWAY - TEST MODE
+    // 1-in-5 chance per valid !fish command.
+    // Once claimed, it automatically shuts itself off.
+    // =====================================================
+
+    const hoodieGiveawayId = 'darkovision_hoodie_test_2026'
+
+    // Create giveaway table if it does not exist yet.
+    await env.FISH_DB
+      .prepare(`
+        CREATE TABLE IF NOT EXISTS hoodie_giveaways (
+          id TEXT PRIMARY KEY,
+          active INTEGER NOT NULL DEFAULT 0,
+          odds_denominator INTEGER NOT NULL DEFAULT 5,
+          claimed_by TEXT,
+          claimed_at INTEGER,
+          created_at INTEGER DEFAULT (unixepoch())
+        )
+      `)
+      .run()
+
+    // Create tonight's test giveaway the first time this runs.
+    await env.FISH_DB
+      .prepare(`
+        INSERT OR IGNORE INTO hoodie_giveaways (
+          id,
+          active,
+          odds_denominator
+        )
+        VALUES (?, 1, 5)
+      `)
+      .bind(hoodieGiveawayId)
+      .run()
+
+    const hoodieGiveaway = await env.FISH_DB
+      .prepare(`
+        SELECT
+          id,
+          active,
+          odds_denominator,
+          claimed_by
+        FROM hoodie_giveaways
+        WHERE id = ?
+      `)
+      .bind(hoodieGiveawayId)
+      .first()
+
+    if (
+      hoodieGiveaway &&
+      Number(hoodieGiveaway.active) === 1 &&
+      !hoodieGiveaway.claimed_by
+    ) {
+      const hoodieOdds = Math.max(
+        1,
+        Number(hoodieGiveaway.odds_denominator ?? 5)
+      )
+
+      const hoodieHit =
+        Math.floor(Math.random() * hoodieOdds) === 0
+
+      if (hoodieHit) {
+        // Atomic claim: only ONE person can successfully flip this
+        // giveaway from active to claimed.
+        const hoodieClaim = await env.FISH_DB
+          .prepare(`
+            UPDATE hoodie_giveaways
+            SET
+              active = 0,
+              claimed_by = ?,
+              claimed_at = ?
+            WHERE id = ?
+              AND active = 1
+              AND claimed_by IS NULL
+          `)
+          .bind(
+            username,
+            now,
+            hoodieGiveawayId
+          )
+          .run()
+
+        const hoodieWasClaimed =
+          Number(hoodieClaim.meta?.changes ?? 0) === 1
+
+        if (hoodieWasClaimed) {
+          // Save this !fish command so the normal cooldown still applies.
+          await env.FISH_DB
+            .prepare(`
+              INSERT OR IGNORE INTO fish_commands (
+                kick_message_id,
+                username,
+                command,
+                catch_name,
+                catch_rarity,
+                catch_type,
+                catch_weight,
+                catch_coins,
+                catch_icon,
+                catch_is_trophy
+              )
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `)
+            .bind(
+              kickMessageId,
+              username,
+              message,
+              'DarkoVision Hoodie',
+              'LEGENDARY GIVEAWAY',
+              'treasure',
+              0,
+              0,
+              '🧥',
+              0
+            )
+            .run()
+
+          await sendKickChatMessage(
+            env,
+            `🚨🚨🚨 HOLY SHIT!!! ${username} JUST CAUGHT THE DARKOVISION HOODIE!!! 🧥🔥 THE GIVEAWAY HAS BEEN CLAIMED! 🚨🚨🚨`
+          )
+
+          console.log(
+            `🧥 HOODIE GIVEAWAY CLAIMED BY ${username}`
+          )
+
+          return new Response('OK', {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+          })
+        }
+      }
+    }
+
+    // Normal fishing continues below if the hoodie was not caught.
 const commandInsert = await env.FISH_DB
   .prepare(`
     INSERT OR IGNORE INTO fish_commands (
