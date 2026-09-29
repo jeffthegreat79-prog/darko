@@ -201,7 +201,6 @@ if (lastFish) {
 }
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
-     const serverCatch = await buildServerCatch(env, username)
        // =====================================================
     // DARKOVISION HOODIE GIVEAWAY - TEST MODE
     // 1-in-5 chance per valid !fish command.
@@ -262,7 +261,14 @@ if (lastFish) {
 
       const hoodieHit =
         Math.floor(Math.random() * hoodieOdds) === 0
-
+// Random teaser while the hoodie giveaway is active.
+// 1-in-10 chance on a valid cast that does NOT win the hoodie.
+if (!hoodieHit && Math.floor(Math.random() * 10) === 0) {
+  await sendKickChatMessage(
+    env,
+    `🌊 Something unusual is lurking beneath the surface...`
+  )
+}
       if (hoodieHit) {
         // Atomic claim: only ONE person can successfully flip this
         // giveaway from active to claimed.
@@ -339,6 +345,7 @@ if (lastFish) {
     }
 
     // Normal fishing continues below if the hoodie was not caught.
+    const serverCatch = await buildServerCatch(env, username)
 const commandInsert = await env.FISH_DB
   .prepare(`
     INSERT OR IGNORE INTO fish_commands (
