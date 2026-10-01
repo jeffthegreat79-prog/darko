@@ -87,12 +87,13 @@ async function buildServerCatch(env, username) {
     legendaryRod: rod.legendary === true,
   })
 
-  return {
-    ...catchResult,
-    rodName,
-    baitName: bait ? baitName : null,
-    baitQuantity,
-  }
+ return {
+  ...catchResult,
+  rodName,
+  baitName: bait ? baitName : null,
+  baitQuantity,
+  specialMessage: fish.specialMessage ?? null,
+}
 }
 export async function onRequestPost(context) {
   const { request, env } = context
@@ -483,6 +484,9 @@ if (serverCatch.type === 'junk') {
   catchMessage = `✨ ${username} found a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
 } else {
   catchMessage = `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+}
+if (serverCatch.specialMessage) {
+  catchMessage += ` ${serverCatch.specialMessage}`
 }
    await sendKickChatMessage(
   env,

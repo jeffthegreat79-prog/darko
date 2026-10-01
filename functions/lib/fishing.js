@@ -1,5 +1,33 @@
 export const fishTable = [
   {
+  name: 'Golden Eye',
+  rarity: 'Uncommon',
+  value: 200,
+  chance: 8,
+  minWeight: 0.5,
+  maxWeight: 4.0,
+  icon: '🐟',
+},
+{
+  name: 'Arctic Char',
+  rarity: 'Rare',
+  value: 300,
+  chance: 5,
+  minWeight: 1.0,
+  maxWeight: 7.0,
+  icon: '🐟',
+},
+{
+  name: 'ECHOK BISH',
+  rarity: 'Legendary',
+  value: 500,
+  chance: 1.5,
+  minWeight: 50,
+  maxWeight: 300,
+  icon: '🐟',
+  specialMessage: 'ONE SHOT ECHOK CAMO!!!',
+},
+  {
   name: 'Bluegill',
   rarity: 'Common',
   value: 12,
