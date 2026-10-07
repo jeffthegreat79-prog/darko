@@ -162,8 +162,26 @@ export async function onRequestPost({ request, env }) {
               (username, item_type, item_name, quantity)
             VALUES (?, 'rod', ?, 1)
           `)
-          .bind(player.username, itemName),
-      ])
+         .bind(player.username, itemName),
+
+env.FISH_DB
+  .prepare(`
+    INSERT INTO player_loadout (username, equipped_rod)
+    VALUES (?, ?)
+    ON CONFLICT(username)
+    DO UPDATE SET equipped_rod = excluded.equipped_rod
+  `)
+  .bind(player.username, itemName),
+
+env.FISH_DB
+  .prepare(`
+    INSERT INTO player_loadout (username, equipped_bait)
+    VALUES (?, ?)
+    ON CONFLICT(username)
+    DO UPDATE SET equipped_bait = excluded.equipped_bait
+  `)
+  .bind(player.username, itemName),
+])
     }
 
     if (itemType === 'bait') {

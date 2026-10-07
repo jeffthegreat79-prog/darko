@@ -507,14 +507,14 @@ if (message.toLowerCase().startsWith('!buybait ')) {
 
   const bait = BAITS[baitKey]
 
-  if (!bait) {
+ if (!bait) {
   await sendKickChatMessage(
     env,
-   catchMessage
+    `🪱 ${username}, I don't recognize that bait. Try !balance to see your bait options.`
   )
+console.log(`Unknown bait requested by ${username}: ${baitKey}`)
+} else {
 
-  console.log(`Unknown bait requested by ${username}: ${baitKey}`)
-  } else {
     // Make sure the player exists.
     await env.FISH_DB
       .prepare(`
@@ -564,7 +564,16 @@ if (message.toLowerCase().startsWith('!buybait ')) {
             DO UPDATE SET quantity = quantity + 5
           `)
           .bind(player.username, bait.name),
-      ])
+
+env.FISH_DB
+  .prepare(`
+    INSERT INTO player_loadout (username, equipped_bait)
+    VALUES (?, ?)
+    ON CONFLICT(username)
+    DO UPDATE SET equipped_bait = excluded.equipped_bait
+  `)
+  .bind(player.username, bait.name),
+])
 
       const updatedPlayer = await env.FISH_DB
         .prepare(`
@@ -586,10 +595,144 @@ if (message.toLowerCase().startsWith('!buybait ')) {
   .first()
 await sendKickChatMessage(
   env,
-  `🪱 ${username} bought 5 ${bait.replyName} for ${bait.cost} coins! Balance: ${updatedPlayer?.coins} coins | ${bait.replyName}: ${updatedBait?.quantity}`
+ `🪱 ${username} bought 5 ${bait.replyName} for ${bait.cost} coins and equipped it! Balance: ${updatedPlayer.coins}`
 )
       console.log(
         `🪱 ${username} bought 5 ${bait.name} for ${bait.cost} coins. Balance: ${updatedPlayer?.coins}`
+      )
+    }
+  }
+}
+
+if (message.toLowerCase().startsWith('!buyrod ')) {
+  const rodKey = message
+    .slice('!buyrod '.length)
+    .trim()
+    .toLowerCase()
+
+  const rodAliases = {
+    "grandpa": {
+      name: "Grandpa's Old Rod",
+      cost: 0,
+    },
+    "grandpa's old rod": {
+      name: "Grandpa's Old Rod",
+      cost: 0,
+    },
+    "fiberglass": {
+      name: "Fiberglass Rod",
+      cost: 150,
+    },
+    "fiberglass rod": {
+      name: "Fiberglass Rod",
+      cost: 150,
+    },
+    "carbon": {
+      name: "Carbon Rod",
+      cost: 500,
+    },
+    "carbon rod": {
+      name: "Carbon Rod",
+      cost: 500,
+    },
+    "legendary": {
+      name: "Legendary Rod",
+      cost: 1500,
+    },
+    "legendary rod": {
+      name: "Legendary Rod",
+      cost: 1500,
+    },
+  }
+
+  const rod = rodAliases[rodKey]
+
+  if (!rod) {
+    await sendKickChatMessage(
+      env,
+      `🎣 ${username}, unknown rod. Try: !buyrod fiberglass, !buyrod carbon, or !buyrod legendary`
+    )
+  } else {
+    // Make sure player exists
+    await env.FISH_DB
+      .prepare(`
+        INSERT OR IGNORE INTO players (username)
+        VALUES (?)
+      `)
+      .bind(username)
+      .run()
+
+    const player = await env.FISH_DB
+      .prepare(`
+        SELECT username, coins
+        FROM players
+        WHERE LOWER(username) = LOWER(?)
+      `)
+      .bind(username)
+      .first()
+
+    const alreadyOwned = await env.FISH_DB
+      .prepare(`
+        SELECT 1
+        FROM player_items
+        WHERE LOWER(username) = LOWER(?)
+          AND item_type = 'rod'
+          AND LOWER(item_name) = LOWER(?)
+      `)
+      .bind(username, rod.name)
+      .first()
+
+    if (alreadyOwned) {
+      await sendKickChatMessage(
+        env,
+        `🎣 ${username}, you already own ${rod.name}. Use !equiprod ${rod.name} to equip it.`
+      )
+    } else if (Number(player?.coins ?? 0) < rod.cost) {
+      await sendKickChatMessage(
+        env,
+        `❌ ${username} doesn't have enough coins! ${rod.name} costs ${rod.cost} coins.`
+      )
+    } else {
+      await env.FISH_DB.batch([
+        env.FISH_DB
+          .prepare(`
+            UPDATE players
+            SET coins = coins - ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE LOWER(username) = LOWER(?)
+          `)
+          .bind(rod.cost, username),
+
+        env.FISH_DB
+          .prepare(`
+            INSERT INTO player_items
+              (username, item_type, item_name, quantity)
+            VALUES (?, 'rod', ?, 1)
+          `)
+          .bind(username, rod.name),
+
+        env.FISH_DB
+          .prepare(`
+            INSERT INTO player_loadout (username, equipped_rod)
+            VALUES (?, ?)
+            ON CONFLICT(username)
+            DO UPDATE SET equipped_rod = excluded.equipped_rod
+          `)
+          .bind(username, rod.name),
+      ])
+
+      const updatedPlayer = await env.FISH_DB
+        .prepare(`
+          SELECT coins
+          FROM players
+          WHERE LOWER(username) = LOWER(?)
+        `)
+        .bind(username)
+        .first()
+
+      await sendKickChatMessage(
+        env,
+        `🎣 ${username} bought ${rod.name} for ${rod.cost} coins and equipped it! Balance: ${updatedPlayer?.coins ?? 0}`
       )
     }
   }
@@ -719,6 +862,88 @@ if (message.toLowerCase() === '!gear') {
   `🎣 ${username}'s Gear | Rod: ${equippedRod} | Bait: ${equippedBait}${loadout?.equipped_bait ? ` (${baitQuantity} left)` : ''}`
 )
 }
+if (message.toLowerCase().startsWith('!equiprod ')) {
+  const requestedRod = message.slice('!equiprod '.length).trim()
+
+  const ownedRod = await env.FISH_DB
+    .prepare(
+      `
+      SELECT item_name, quantity
+      FROM player_items
+      WHERE LOWER(username) = LOWER(?)
+        AND item_type = 'rod'
+        AND LOWER(item_name) = LOWER(?)
+        AND quantity > 0
+      `
+    )
+    .bind(username, requestedRod)
+    .first()
+
+  if (!ownedRod) {
+    await sendKickChatMessage(
+      env,
+      `🎣 ${username}, you don't own a rod named "${requestedRod}".`
+    )
+  } else {
+    await env.FISH_DB
+      .prepare(
+        `
+        INSERT INTO player_loadout (username, equipped_rod)
+        VALUES (?, ?)
+        ON CONFLICT(username)
+        DO UPDATE SET equipped_rod = excluded.equipped_rod
+        `
+      )
+      .bind(username, ownedRod.item_name)
+      .run()
+
+    await sendKickChatMessage(
+      env,
+      `🎣 ${username} equipped ${ownedRod.item_name}! ✅`
+    )
+  }
+}
+if (message.toLowerCase().startsWith('!equipbait ')) {
+  const requestedBait = message.slice('!equipbait '.length).trim()
+
+  const ownedBait = await env.FISH_DB
+    .prepare(
+      `
+      SELECT item_name, quantity
+      FROM player_items
+      WHERE LOWER(username) = LOWER(?)
+        AND item_type = 'bait'
+        AND LOWER(item_name) = LOWER(?)
+        AND quantity > 0
+      `
+    )
+    .bind(username, requestedBait)
+    .first()
+
+  if (!ownedBait) {
+    await sendKickChatMessage(
+      env,
+      `🪱 ${username}, you don't own any bait named "${requestedBait}".`
+    )
+  } else {
+    await env.FISH_DB
+      .prepare(
+        `
+        INSERT INTO player_loadout (username, equipped_bait)
+        VALUES (?, ?)
+        ON CONFLICT(username)
+        DO UPDATE SET equipped_bait = excluded.equipped_bait
+        `
+      )
+      .bind(username, ownedBait.item_name)
+      .run()
+
+    await sendKickChatMessage(
+      env,
+      `🪱 ${username} equipped ${ownedBait.item_name}! You have ${ownedBait.quantity} left. ✅`
+    )
+  }
+}
 if (message === '!balance') {
   await env.FISH_DB
     .prepare(`
@@ -771,10 +996,15 @@ if (message === '!balance') {
   )
 }
 if (message.toLowerCase() === '!fishhelp') {
-  await sendKickChatMessage(
-    env,
-    `🎣 Fishing Commands | !fish - Cast a line | !balance - Coins & bait | !gear - Equipped gear | !inventory - Everything you own | !leaderboard - Top anglers | !buybait [bait] - Buy bait`
-  )
+ await sendKickChatMessage(
+  env,
+  `🎣 Fishing | !fish - Cast | !balance - Coins & bait | !gear - Equipped gear | !inventory - Owned gear`
+)
+
+await sendKickChatMessage(
+  env,
+  `🛒 Gear | !buyrod fiberglass/carbon/legendary | !equiprod <rod> | !buybait <bait> | !equipbait <bait>`
+)
 }
     return new Response('OK', {
       status: 200,
