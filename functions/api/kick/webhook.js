@@ -149,10 +149,6 @@ if (message === '!plinko' || message.startsWith('!plinko ')) {
     return new Response('OK', { status: 200 })
   }
 
-  await sendKickChatMessage(
-    env,
-    `🔴 ${username} dropped ${result.wager} coins into DINKO! Puck incoming...`
-  )
 
   console.log(
     `🔴 DINKO queued for ${username}: ${result.wager} coins → ${result.multiplier}x → ${result.payout} payout`
