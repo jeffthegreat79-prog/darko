@@ -204,7 +204,7 @@ if (lastFish) {
     // Once claimed, it automatically shuts itself off.
     // =====================================================
 
-    const hoodieGiveawayId = 'darkovision_hoodie_test_2026'
+    const hoodieGiveawayId = 'darkovision_hoodie_live_2026_01'
 
     // Create giveaway table if it does not exist yet.
     await env.FISH_DB
@@ -212,7 +212,7 @@ if (lastFish) {
         CREATE TABLE IF NOT EXISTS hoodie_giveaways (
           id TEXT PRIMARY KEY,
           active INTEGER NOT NULL DEFAULT 0,
-          odds_denominator INTEGER NOT NULL DEFAULT 5,
+          odds_denominator INTEGER NOT NULL DEFAULT 1000,
           claimed_by TEXT,
           claimed_at INTEGER,
           created_at INTEGER DEFAULT (unixepoch())
@@ -228,7 +228,7 @@ if (lastFish) {
           active,
           odds_denominator
         )
-        VALUES (?, 1, 5)
+        VALUES (?, 0, 1000)
       `)
       .bind(hoodieGiveawayId)
       .run()
@@ -253,7 +253,7 @@ if (lastFish) {
     ) {
       const hoodieOdds = Math.max(
         1,
-        Number(hoodieGiveaway.odds_denominator ?? 5)
+        Number(hoodieGiveaway.odds_denominator ?? 1000)
       )
 
       const hoodieHit =

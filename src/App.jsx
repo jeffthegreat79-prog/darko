@@ -375,6 +375,9 @@ function App() {
     }
   })
   const [kickConnected, setKickConnected] = useState(false)
+  
+const [kickUserId, setKickUserId] = useState(null);
+
 const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
 useEffect(() => {
   async function checkKickViewer() {
@@ -397,8 +400,9 @@ useEffect(() => {
         setKickPlayerStats(null)
         return
       }
-
+setKickUserId(null)
       setKickConnected(true)
+      setKickUserId(String(data.viewer.kickUserId))
 
       const playerResponse = await fetch(
         `/api/player?username=${encodeURIComponent(username)}`,
@@ -1312,6 +1316,17 @@ return () => clearInterval(interval)
     ? `✓ ${kickPlayerStats?.username || 'Kick'} Connected`
     : 'Connect Kick'}
 </button>
+{kickConnected && kickUserId === '1575632' && (
+  <button
+    type="button"
+    className="kick-button"
+    onClick={() => {
+      window.location.href = '/hoodie-admin'
+    }}
+  >
+    🧥 Hoodie Giveaway
+  </button>
+)}
 <button
   className="dinko-nav-button"
   type="button"

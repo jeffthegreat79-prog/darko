@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkoVision Hoodie Giveaway Admin</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 30px 15px;
+      background: #0b1015;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .panel {
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #171f28;
+      border: 1px solid #334455;
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #53fc86;
+      margin-bottom: 5px;
+    }
+
+    h2 { font-size: 18px; }
+
+    .subtitle { color: #aab8c6; }
+
+    .status {
+      padding: 20px;
+      margin: 25px 0;
+      background: #0b1219;
+      border-radius: 10px;
+    }
+
+    #giveawayStatus {
+      font-size: 25px;
+      font-weight: bold;
+      color: #fbbf24;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #506070;
+      background: #0b1219;
+      color: white;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    button {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 8px 3px;
+      font-size: 15px;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .start { background: #53fc86; color: #08140b; }
+    .stop { background: #ff5555; color: white; }
+    .refresh { background: #405366; color: white; }
+
+    #message {
+      margin-top: 20px;
+      color: #aab8c6;
+      overflow-wrap: anywhere;
+    }
+
+    .back {
+      color: #53fc86;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="panel">
+    <h1>🎣 DARKOVISION</h1>
+    <p class="subtitle">Hoodie Giveaway Control Panel</p>
+
+    <div class="status">
+      <h2>Giveaway Status</h2>
+      <div id="giveawayStatus">LOADING...</div>
+      <p id="winnerInfo"></p>
+    </div>
+
+    <label for="odds">Winning Odds (1 in X)</label>
+    <input
+      type="number"
+      id="odds"
+      min="100"
+      max="1000000"
+      step="1"
+      value="1000"
+    >
+
+    <p class="subtitle">
+      Example: 1000 = 1 in 1000 chance
+    </p>
+
+    <div>
+      <button class="start" id="startBtn">
+        ▶ START GIVEAWAY
+      </button>
+
+      <button class="stop" id="stopBtn">
+        ■ STOP GIVEAWAY
+      </button>
+    </div>
+
+    <button class="refresh" id="refreshBtn">
+      ↻ Refresh Status
+    </button>
+
+    <div id="message"></div>
+
+    <p style="margin-top:30px">
+      <a href="/" class="back">← Back to Fishing Pond</a>
+    </p>
+  </div>
+
+  <script>
+    const API = "/api/hoodie-control";
+
+    const statusEl = document.getElementById("giveawayStatus");
+    const winnerEl = document.getElementById("winnerInfo");
+    const messageEl = document.getElementById("message");
+    const oddsInput = document.getElementById("odds");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    let giveaway = null;
+    let busy = false;
+    let loaded = false;
+
+    function updateButtons() {
+      const active = Number(giveaway?.active) === 1;
+      const claimed = Boolean(giveaway?.claimed_by);
+
+      startBtn.disabled = busy || !loaded || active || claimed;
+      stopBtn.disabled = busy || !loaded || !active;
+      refreshBtn.disabled = busy;
+      oddsInput.disabled = busy || active || claimed;
+    }
+
+    function renderStatus(data) {
+      giveaway = data;
+      loaded = true;
+
+      const active = Number(data?.active) === 1;
+      const claimed = Boolean(data?.claimed_by);
+
+      if (claimed) {
+        statusEl.textContent = "🏆 CLAIMED";
+        statusEl.style.color = "#fbbf24";
+        winnerEl.textContent = "Winner: " + data.claimed_by;
+      } else if (active) {
+        statusEl.textContent = "🟢 ACTIVE";
+        statusEl.style.color = "#53fc86";
+        winnerEl.textContent = "Giveaway is running!";
+      } else {
+        statusEl.textContent = "🔴 INACTIVE";
+        statusEl.style.color = "#ff5555";
+        winnerEl.textContent = "Giveaway is currently stopped.";
+      }
+
+      if (data?.odds_denominator != null) {
+        oddsInput.value = data.odds_denominator;
+      }
+
+      updateButtons();
+    }
+
+    async function apiRequest(options = {}) {
+      const response = await fetch(API, {
+        credentials: "include",
+        ...options
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.success === false) {
+        throw new Error(
+          data.error || data.message ||
+          "Request failed (HTTP " + response.status + ")"
+        );
+      }
+
+      return data;
+    }
+
+    async function loadStatus() {
+      busy = true;
+      messageEl.textContent = "Checking giveaway status...";
+      updateButtons();
+
+      try {
+        const data = await apiRequest();
+        renderStatus(data.giveaway);
+        messageEl.textContent = "Status updated.";
+      } catch (error) {
+        loaded = false;
+        statusEl.textContent = "ERROR";
+        statusEl.style.color = "#ff5555";
+        messageEl.textContent = error.message;
+      } finally {
+        busy = false;
+        updateButtons();
+      }
+    }
+
+    async function controlGiveaway(action) {
+      const odds = Number(oddsInput.value);
+
+      if (
+        action === "start" &&
+        (!Number.isInteger(odds) || odds < 100 || odds > 1000000)
+      ) {
+        messageEl.textContent =
+          "Odds must be between 100 and 1,000,000.";
+        return;
+      }
+
+      busy = true;
+      messageEl.textContent = "Updating giveaway...";
+      updateButtons();
+
+      try {
+        const payload = { action };
+
+        if (action === "start") {
+          payload.odds = odds;
+        }
+
+        const data = await apiRequest({
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        renderStatus(data.giveaway);
+        messageEl.textContent =
+          action === "start"
+            ? "Giveaway started successfully!"
+            : "Giveaway stopped successfully!";
+
+      } catch (error) {
+        messageEl.textContent = error.message;
+      } finally {
+        busy = false;
+        updateButtons();
+      }
+    }
+
+    startBtn.addEventListener("click", () => {
+      controlGiveaway("start");
+    });
+
+    stopBtn.addEventListener("click", () => {
+      controlGiveaway("stop");
+    });
+
+    refreshBtn.addEventListener("click", loadStatus);
+
+    updateButtons();
+    loadStatus();
+  </script>
+</body>
+</html>
