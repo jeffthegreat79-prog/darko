@@ -257,17 +257,10 @@ if (lastFish) {
       )
 
       
-const HOODIE_TEST_MODE = true;
-
-const isHoodieTest =
-  HOODIE_TEST_MODE &&
-  String(username).toLowerCase() === "darkovision";
-
 
 const hoodieHit =
-  isHoodieTest ||
-  (!HOODIE_TEST_MODE &&
-    Math.floor(Math.random() * hoodieOdds) === 0);
+  Math.floor(Math.random() * hoodieOdds) === 0;
+
 
 
 // Random teaser while the hoodie giveaway is active.
@@ -280,18 +273,6 @@ if (!hoodieHit && Math.floor(Math.random() * 10) === 0) {
 }
       if (hoodieHit) {
         
-
-if (isHoodieTest) {
-  await sendKickChatMessage(
-    env,
-    `🧪 TEST ONLY: ${username} triggered the hoodie win! No hoodie was awarded.`
-  );
-
-  console.log(`🧪 HOODIE TEST SUCCESS: ${username}`);
-
-  return new Response("OK", { status: 200 });
-}
-
         // Atomic claim: only ONE person can successfully flip this
         // giveaway from active to claimed.
         const hoodieClaim = await env.FISH_DB
