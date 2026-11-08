@@ -583,6 +583,7 @@ const [leaderboard, setLeaderboard] = useState([])
 const [leaderboardLoading, setLeaderboardLoading] = useState(false)
 const lastKickCommandId = useRef(null)
 const castLineRef = useRef(null)
+const websiteCastPendingRef = useRef(false)
   useEffect(() => {
     localStorage.setItem('darko-player', JSON.stringify(player))
   }, [player])
@@ -918,6 +919,65 @@ function getRandomFish(rareBonus = 0) {
   return fishTable[0]
 }
 
+async function handleWebsiteCast() {
+  if (isFishing || websiteCastPendingRef.current) return
+
+  // Keep local fishing available to guests.
+  if (!kickPlayerStats?.username) {
+    castLine()
+    return
+  }
+
+  websiteCastPendingRef.current = true
+
+  try {
+    const response = await fetch('/api/fish/website-cast', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const data = await response.json()
+
+    if (!response.ok || !data.success || !data.catch) {
+      throw new Error(data.error || 'Website cast failed')
+    }
+
+    // The backend already saved this catch and its coins.
+    // Play the existing animation without saving it again.
+    castLine(data.username, null, {
+      ...data.catch,
+      savedInD1: true,
+    })
+
+    // Refresh the connected player's real D1 balance.
+    try {
+      const playerResponse = await fetch(
+        `/api/player?username=${encodeURIComponent(data.username)}`,
+        { cache: 'no-store' }
+      )
+
+      if (playerResponse.ok) {
+        const playerData = await playerResponse.json()
+
+        if (playerData.player) {
+          setKickPlayerStats(playerData.player)
+        }
+      }
+    } catch (refreshError) {
+      console.error('Balance refresh failed:', refreshError)
+    }
+
+  } catch (error) {
+    console.error('Website cast failed:', error)
+    alert(error.message || 'Unable to fish right now.')
+  } finally {
+    websiteCastPendingRef.current = false
+  }
+}
+
 function castLine(
   kickUsername = null,
   kickCommandId = null,
@@ -1067,7 +1127,9 @@ const completedCatch = {
 
       setCatchResult(completedCatch)
       setFishingPhase('caught')
-if (completedCatch.username) {
+
+if (completedCatch.username && !serverCatch?.savedInD1) {
+
   fetch('/api/fish/catch', {
     method: 'POST',
     headers: {
@@ -1384,7 +1446,7 @@ return () => clearInterval(interval)
             <button
               className="primary-button"
               type="button"
-              onClick={castLine}
+              onClick={handleWebsiteCast}
               disabled={isFishing}
             >
               {isFishing ? 'Waiting for a bite...' : '🎣 Cast a Line'}
