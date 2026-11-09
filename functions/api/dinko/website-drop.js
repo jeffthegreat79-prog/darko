@@ -151,9 +151,8 @@ if (!allowedHosts.includes(url.hostname)) {
         env.FISH_DB.prepare(`
           UPDATE players
           SET coins = coins - ? + ?
-          WHERE username = ? COLLATE NOCASE
-            AND coins >= ?
-            AND EXISTS (
+         WHERE username = ? COLLATE NOCASE
+  AND EXISTS (
               SELECT 1
               FROM dinko_plays
               WHERE kick_message_id = ?
@@ -161,12 +160,11 @@ if (!allowedHosts.includes(url.hostname)) {
             )
           RETURNING coins
         `).bind(
-          wager,
-          result.payout,
-          session.username,
-          wager,
-          playKey
-        ),
+  wager,
+  result.payout,
+  session.username,
+  playKey
+),
       ])
 
     const play = insertResult.results?.[0]
