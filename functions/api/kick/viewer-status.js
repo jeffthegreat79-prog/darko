@@ -52,14 +52,34 @@ export async function onRequestGet({ request, env }) {
       )
     }
 
-    return Response.json({
-      success: true,
-      connected: true,
-      viewer: {
-        kickUserId: session.kick_user_id,
-        username: session.username,
-      },
-    })
+
+const player = await env.FISH_DB
+  .prepare(`
+    SELECT coins
+    FROM players
+    WHERE username = ? COLLATE NOCASE
+    LIMIT 1
+  `)
+  .bind(session.username)
+  .first()
+
+return Response.json(
+  {
+    success: true,
+    connected: true,
+    viewer: {
+      kickUserId: session.kick_user_id,
+      username: session.username,
+      coins: Number(player?.coins ?? 0),
+    },
+  },
+  {
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+  }
+)
+
   } catch (error) {
     console.error('Kick viewer status error:', error)
 

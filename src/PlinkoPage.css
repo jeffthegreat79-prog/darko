@@ -1,0 +1,187 @@
+
+.plinko-page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: 48px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 50% 25%,
+      rgba(0, 255, 130, 0.13),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(145, 0, 255, 0.16),
+      transparent 50%
+    ),
+    #080d18;
+}
+
+.plinko-page h1 {
+  color: #4ade80;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 900;
+  text-shadow: 0 0 22px rgba(0, 255, 100, 0.5);
+  margin-bottom: 12px;
+}
+
+.plinko-page p {
+  color: #cbd5e1;
+  font-size: 17px;
+  margin-bottom: 30px;
+}
+
+.plinko-controls {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 0 35px rgba(0, 255, 100, 0.08);
+}
+
+.plinko-controls label {
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.plinko-controls input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #334155;
+  background: #020617;
+  color: #ffffff;
+  font-size: 20px;
+  text-align: center;
+}
+
+.plinko-controls input:focus {
+  outline: none;
+  border-color: #4ade80;
+}
+
+.plinko-controls button {
+  width: 100%;
+  padding: 17px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.plinko-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .plinko-page {
+    padding: 24px 12px;
+  }
+
+  .plinko-page p {
+    font-size: 14px;
+  }
+
+  .plinko-controls {
+    padding: 20px 16px;
+  }
+}
+
+/* Website Plinko board only — OBS stays unchanged */
+
+.plinko-page .dinko-overlay.dinko-website {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  background: transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.plinko-page .dinko-website .dinko-board {
+  background: linear-gradient(
+    155deg,
+    #15243b 0%,
+    #0b1222 65%,
+    #17102b 100%
+  );
+
+  border: 2px solid rgba(74, 222, 128, 0.65);
+
+  box-shadow:
+    0 0 35px rgba(74, 222, 128, 0.17),
+    inset 0 0 30px rgba(74, 222, 128, 0.05);
+}
+
+.plinko-page .dinko-website .dinko-header h1 {
+  color: #4ade80;
+  text-shadow:
+    0 0 12px rgba(74, 222, 128, 0.7),
+    0 0 25px rgba(74, 222, 128, 0.35);
+}
+
+.plinko-page .dinko-website .dinko-header p {
+  color: #c4b5fd;
+}
+
+/* Space between wager controls and Plinko board */
+.plinko-page .dinko-website {
+  margin-top: 35px;
+}
+
+/* Responsive website Plinko board */
+
+.plinko-board-frame {
+  position: relative;
+  width: 100%;
+  max-width: 948px;
+  margin-top: 35px;
+}
+
+.plinko-board-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 948px;
+  transform-origin: top left;
+}
+
+.plinko-page .dinko-website {
+  margin-top: 0;
+}
+
+.plinko-viewer {
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.8;
+  margin-bottom: 18px;
+}
+
+.plinko-viewer a {
+  color: #4ade80;
+  text-decoration: underline;
+}

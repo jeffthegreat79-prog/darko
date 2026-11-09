@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cloudflare local development
+.wrangler/
+wrangler.jsonc
+wrangler.local.jsonc
+local-test-schema.sql

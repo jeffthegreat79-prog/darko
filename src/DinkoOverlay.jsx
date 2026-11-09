@@ -30,7 +30,7 @@ const SLOT_WIDTH = BOARD_WIDTH / slots.length
 const wait = (ms) =>
   new Promise((resolve) => setTimeout(resolve, ms))
 
-export default function DinkoOverlay() {
+export default function DinkoOverlay({ mode = 'obs' }) {
   const [currentPlay, setCurrentPlay] = useState(null)
   const [puckPosition, setPuckPosition] = useState({
     x: BOARD_WIDTH / 2,
@@ -40,13 +40,17 @@ export default function DinkoOverlay() {
 
   const busyRef = useRef(false)
 
-  useEffect(() => {
-    document.body.classList.add('dinko-overlay-body')
 
-    return () => {
-      document.body.classList.remove('dinko-overlay-body')
-    }
-  }, [])
+useEffect(() => {
+  if (mode !== 'obs') return
+
+  document.body.classList.add('dinko-overlay-body')
+
+  return () => {
+    document.body.classList.remove('dinko-overlay-body')
+  }
+}, [mode])
+
 
   useEffect(() => {
     let cancelled = false
@@ -373,7 +377,11 @@ setWinningSlot(slotIndex)
 
       await wait(1000)
 
-      await completePlay(play.id)
+
+if (mode === 'obs' && play.id != null) {
+  await completePlay(play.id)
+}
+
 
       await wait(1200)
 
@@ -448,17 +456,57 @@ setWinningSlot(slotIndex)
       })
     }
 
-    if (
-      window.location.hostname ===
-      'localhost'
-    ) {
-      window.addEventListener(
-        'keydown',
-        handleLocalDrop
-      )
-    } else {
-      pollForPlay()
-    }
+function handleWebsiteDrop(event) {
+  if (mode !== 'website' || busyRef.current) {
+    return
+  }
+
+  const play = event.detail?.play
+
+  if (
+    !play ||
+    !Number.isInteger(play.slot_index) ||
+    play.slot_index < 0 ||
+    play.slot_index >= slots.length
+  ) {
+    return
+  }
+
+
+animatePlay(play)
+  .then(() => {
+    window.dispatchEvent(
+      new Event('plinko:drop-finished')
+    )
+  })
+  .catch((error) => {
+    console.error('Website Plinko animation error:', error)
+
+    window.dispatchEvent(
+      new Event('plinko:drop-error')
+    )
+  })
+  .finally(() => {
+    busyRef.current = false
+  })
+
+}
+
+if (mode === 'website') {
+  window.addEventListener(
+    'plinko:drop',
+    handleWebsiteDrop
+  )
+}
+
+if (mode === 'obs') {
+  if (window.location.hostname === 'localhost') {
+    window.addEventListener('keydown', handleLocalDrop)
+  } else {
+    pollForPlay()
+  }
+}
+
 
     return () => {
       cancelled = true
@@ -473,16 +521,19 @@ setWinningSlot(slotIndex)
         'keydown',
         handleLocalDrop
       )
-
+window.removeEventListener(
+  'plinko:drop',
+  handleWebsiteDrop
+)
       removeBall()
 
       Composite.clear(world, false)
       Engine.clear(engine)
     }
-  }, [])
+ }, [mode])
 
   return (
-    <main className="dinko-overlay">
+    <main className={`dinko-overlay ${mode === 'website' ? 'dinko-website' : ''}`}>
       <section className="dinko-board">
         <div className="dinko-header">
           <h1>plinko</h1>
@@ -501,8 +552,8 @@ setWinningSlot(slotIndex)
               top: `${puckPosition.y}px`,
             }}
           >
-            
-           
+
+
           </div>
 
           <div className="dinko-pegs">
@@ -561,4 +612,4 @@ setWinningSlot(slotIndex)
       </section>
     </main>
   )
-} 
+}

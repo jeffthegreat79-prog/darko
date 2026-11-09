@@ -1393,10 +1393,10 @@ return () => clearInterval(interval)
   className="dinko-nav-button"
   type="button"
   onClick={() => {
-    window.location.href = '/dinko-overlay'
+    window.location.href = '/plinko'
   }}
 >
-  🔴 Play DINKO
+  🎰 Play PLINKO
 </button>
 </div>
 
