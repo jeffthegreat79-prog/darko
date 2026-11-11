@@ -575,9 +575,29 @@ async function saveWebsiteCatch(env, session, websiteCatch, equippedBait) {
   statements.push(awardCoins)
 
   const results = await db.batch(statements)
-  const payout = results[results.length - 1]
 
-  return Number(payout?.meta?.changes ?? 0) === 1
+const reserved =
+  Number(results[0]?.meta?.changes ?? 0) === 1
+
+const baitDeducted = !baitName ||
+  Number(results[1]?.meta?.changes ?? 0) === 1
+
+const payout =
+  results[results.length - 1]
+
+const coinsAwarded =
+  Number(payout?.meta?.changes ?? 0) === 1
+
+if (reserved && (!baitDeducted || !coinsAwarded)) {
+  console.error('Website fishing transaction incomplete', {
+    reserved,
+    baitDeducted,
+    coinsAwarded,
+  })
+}
+
+return reserved && baitDeducted && coinsAwarded
+
 }
 
 
