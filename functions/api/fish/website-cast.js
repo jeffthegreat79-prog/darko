@@ -298,7 +298,9 @@ const fishTable = [
 ];
 const rods = [
   {
-    name: "Grandpa's old Rod",
+    name:
+"Grandpa's Old Rod"
+,
     cost: 0,
     bonus: 0,
     weightCap: 0.7,
@@ -366,7 +368,9 @@ function rollWebsiteFish(rareBonus = 0) {
 
 const websiteRods = [
   {
-    name: "Grandpa's old Rod",
+    name:
+"Grandpa's Old Rod"
+,
     bonus: 0,
     weightCap: 0.7,
   },

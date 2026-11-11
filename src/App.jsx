@@ -290,7 +290,9 @@ const fishTable = [
 ];
 const rods = [
   {
-    name: "Grandpa's old Rod",
+    name:
+"Grandpa's Old Rod"
+,
     cost: 0,
     bonus: 0,
     weightCap: 0.7,
@@ -375,7 +377,7 @@ function App() {
     }
   })
   const [kickConnected, setKickConnected] = useState(false)
-  
+
 const [kickUserId, setKickUserId] = useState(null);
 
 const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
@@ -1405,7 +1407,7 @@ return () => clearInterval(interval)
           <p className="eyebrow">Interactive stream fishing</p>
 
           <h1>
-            Rippin Lips 
+            Rippin Lips
             and
             <span> Eatin chips.</span>
           </h1>
@@ -1724,7 +1726,7 @@ return () => clearInterval(interval)
             <p>Cast directly from chat while watching the live stream.</p>
           </article>
         </div>
-       
+
 {leaderboardOpen && (
   <div
     className="feature-card"
@@ -1880,7 +1882,7 @@ const isEquipped = kickPlayerStats?.username
   ? kickPlayerStats.loadout?.equipped_bait === bait.name
   : player.bait === bait.name
   return (
-  
+
     <div key={bait.name} className="shop-item bait-shop-item">
      <div className="shop-item-main">
   <div className="shop-item-info">

@@ -304,10 +304,12 @@ export const fishTable = [
   icon: '🔫'
 }
 ]
+
 export const RODS = {
-  "Grandpa's old Rod": {
+  "Grandpa's Old Rod": {
     weightCap: 0.7,
   },
+
 
   'Fiberglass Rod': {
     weightCap: 0.85,

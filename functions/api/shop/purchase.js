@@ -1,5 +1,21 @@
+function getCookie(request, name) {
+  const cookieHeader = request.headers.get('Cookie') || ''
+  const cookies = cookieHeader.split(';').map((cookie) => cookie.trim())
+
+  for (const cookie of cookies) {
+    const [key, ...valueParts] = cookie.split('=')
+
+    if (key === name) {
+      return valueParts.join('=')
+    }
+  }
+
+  return null
+}
+
 const RODS = {
   "Grandpa's Old Rod": 0,
+
   "Fiberglass Rod": 150,
   "Carbon Rod": 500,
   "Legendary Rod": 1500,
@@ -146,65 +162,99 @@ export async function onRequestPost({ request, env }) {
         )
       }
 
-      await env.FISH_DB.batch([
+      const rodResults = await env.FISH_DB.batch([
         env.FISH_DB
           .prepare(`
-            UPDATE players
-            SET coins = coins - ?,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE username = ?
+        UPDATE players
+SET coins = coins - ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE username = ?
+  AND coins >= ?
+  AND NOT EXISTS (
+    SELECT 1
+    FROM player_items
+    WHERE username = ?
+      AND item_type = 'rod'
+      AND item_name = ?
+  )
           `)
-          .bind(cost, player.username),
-
+          .bind(cost, player.username, cost, player.username, itemName),
         env.FISH_DB
           .prepare(`
-            INSERT INTO player_items
-              (username, item_type, item_name, quantity)
-            VALUES (?, 'rod', ?, 1)
+           INSERT INTO player_items
+  (username, item_type, item_name, quantity)
+SELECT ?, 'rod', ?, 1
+WHERE changes() = 1
           `)
          .bind(player.username, itemName),
 
 env.FISH_DB
   .prepare(`
     INSERT INTO player_loadout (username, equipped_rod)
-    VALUES (?, ?)
-    ON CONFLICT(username)
-    DO UPDATE SET equipped_rod = excluded.equipped_rod
+SELECT ?, ?
+WHERE changes() = 1
+ON CONFLICT(username)
+DO UPDATE SET equipped_rod = excluded.equipped_rod
   `)
   .bind(player.username, itemName),
 
-env.FISH_DB
-  .prepare(`
-    INSERT INTO player_loadout (username, equipped_bait)
-    VALUES (?, ?)
-    ON CONFLICT(username)
-    DO UPDATE SET equipped_bait = excluded.equipped_bait
-  `)
-  .bind(player.username, itemName),
+
 ])
+const rodChanges = rodResults.map(
+  (result) => result.meta?.changes ?? 0
+)
+
+if (rodChanges.length !== 3 || rodChanges.some((count) => count !== 1)) {
+  console.error('Rod purchase incomplete:', rodChanges)
+
+  return Response.json(
+    {
+      success: false,
+      error: 'Rod purchase did not complete correctly',
+    },
+    { status: 409 }
+  )
+}
     }
 
     if (itemType === 'bait') {
-      await env.FISH_DB.batch([
+      const baitResults = await env.FISH_DB.batch([
         env.FISH_DB
           .prepare(`
-            UPDATE players
-            SET coins = coins - ?,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE username = ?
+           UPDATE players
+SET coins = coins - ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE username = ?
+  AND coins >= ?
           `)
-          .bind(cost, player.username),
+          .bind(cost, player.username, cost),
 
         env.FISH_DB
           .prepare(`
             INSERT INTO player_items
-              (username, item_type, item_name, quantity)
-            VALUES (?, 'bait', ?, 5)
-            ON CONFLICT(username, item_type, item_name)
-            DO UPDATE SET quantity = quantity + 5
+  (username, item_type, item_name, quantity)
+SELECT ?, 'bait', ?, 5
+WHERE changes() = 1
+ON CONFLICT(username, item_type, item_name)
+DO UPDATE SET quantity = quantity + 5
           `)
           .bind(player.username, itemName),
       ])
+      const baitChanges = baitResults.map(
+  (result) => result.meta?.changes ?? 0
+)
+
+if (baitChanges.length !== 2 || baitChanges.some((count) => count !== 1)) {
+  console.error('Bait purchase incomplete:', baitChanges)
+
+  return Response.json(
+    {
+      success: false,
+      error: 'Bait purchase did not complete correctly',
+    },
+    { status: 409 }
+  )
+}
     }
 
     const updatedPlayer = await env.FISH_DB

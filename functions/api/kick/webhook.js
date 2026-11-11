@@ -47,14 +47,16 @@ async function buildServerCatch(env, username) {
     .bind(username)
     .first()
 
-  const rodName =
-    loadout?.equipped_rod || "Grandpa's old Rod"
 
-  const baitName =
-    loadout?.equipped_bait || null
+const rodName =
+  loadout?.equipped_rod || "Grandpa's Old Rod"
 
-  const rod =
-    RODS[rodName] || RODS["Grandpa's old Rod"]
+const baitName =
+  loadout?.equipped_bait || null
+
+const rod =
+  RODS[rodName] || RODS["Grandpa's Old Rod"]
+
 
   let baitQuantity = 0
 
@@ -106,7 +108,8 @@ export async function onRequestPost(context) {
 
     const message = body.content?.trim().toLowerCase()
     const username = body.sender?.username ?? 'Unknown'
-    const kickMessageId = body.message_id
+const kickUserId = body.sender?.user_id
+const kickMessageId = body.message_id
 
     console.log('Kick chat message:', body.content)
 if (message === '!plinko' || message.startsWith('!plinko ')) {
@@ -158,44 +161,76 @@ if (message === '!plinko' || message.startsWith('!plinko ')) {
 }
     if (message === '!fish') {
       const now = Math.floor(Date.now() / 1000)
-const cooldownSeconds = 3 * 60
 
-const lastFish = await env.FISH_DB
+const existingCommand = await env.FISH_DB
   .prepare(`
-    SELECT created_at
+    SELECT id
     FROM fish_commands
-    WHERE LOWER(username) = LOWER(?)
-      AND command = '!fish'
-    ORDER BY created_at DESC
+    WHERE kick_message_id = ?
     LIMIT 1
   `)
-  .bind(username)
+  .bind(kickMessageId)
   .first()
 
-if (lastFish) {
-  const elapsedSeconds =
-    now - Number(lastFish.created_at)
-
-  if (elapsedSeconds < cooldownSeconds) {
-    const remainingSeconds =
-      cooldownSeconds - elapsedSeconds
-
-    const remainingMinutes =
-      Math.ceil(remainingSeconds / 60)
-
-    await sendKickChatMessage(
-      env,
-      `🎣 Nothing's biting at the moment, try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}`
-    )
-
-    return new Response('OK', {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    })
-  }
+if (existingCommand) {
+  console.log(`Duplicate !fish ignored: ${kickMessageId}`)
+  return new Response('OK', { status: 200 })
 }
+
+
+
+const cooldownSeconds = 180
+const castToken = crypto.randomUUID()
+
+if (kickUserId == null) {
+  console.error('Missing Kick user ID for fishing:', username)
+  return new Response('OK', { status: 200 })
+}
+
+const reservation = await env.FISH_DB
+  .prepare(`
+    INSERT INTO website_cast_cooldowns (
+      kick_user_id,
+      last_cast_at,
+      last_cast_token
+    )
+    VALUES (?, ?, ?)
+    ON CONFLICT(kick_user_id) DO UPDATE SET
+      last_cast_at = excluded.last_cast_at,
+      last_cast_token = excluded.last_cast_token
+    WHERE website_cast_cooldowns.last_cast_at <= ?
+  `)
+  .bind(kickUserId, now, castToken, now - cooldownSeconds)
+  .run()
+
+const castReserved =
+  Number(reservation.meta?.changes ?? 0) === 1
+
+if (!castReserved) {
+  const previousCast = await env.FISH_DB
+    .prepare(`
+      SELECT last_cast_at
+      FROM website_cast_cooldowns
+      WHERE kick_user_id = ?
+    `)
+    .bind(kickUserId)
+    .first()
+
+  const remainingSeconds = Math.max(
+    1,
+    cooldownSeconds - (now - Number(previousCast?.last_cast_at ?? now))
+  )
+
+  const remainingMinutes = Math.ceil(remainingSeconds / 60)
+
+  await sendKickChatMessage(
+    env,
+    `🎣 Nothing's biting at the moment, try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}`
+  )
+
+  return new Response('OK', { status: 200 })
+}
+
       console.log(`🎣 FISH COMMAND received from ${username}`)
 
        // =====================================================
@@ -256,7 +291,7 @@ if (lastFish) {
         Number(hoodieGiveaway.odds_denominator ?? 1000)
       )
 
-      
+
 
 const hoodieHit =
   Math.floor(Math.random() * hoodieOdds) === 0;
@@ -272,7 +307,7 @@ if (!hoodieHit && Math.floor(Math.random() * 10) === 0) {
   )
 }
       if (hoodieHit) {
-        
+
         // Atomic claim: only ONE person can successfully flip this
         // giveaway from active to claimed.
         const hoodieClaim = await env.FISH_DB
@@ -480,13 +515,15 @@ recordSpecies
       .run()
 let catchMessage
 
+
 if (serverCatch.type === 'junk') {
-  catchMessage = `🗑️ ${username} fished up a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+  catchMessage = `🗑️ ${username} fished up a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! [${serverCatch.rarity}] +${serverCatch.coins} coins`
 } else if (serverCatch.type === 'treasure') {
-  catchMessage = `✨ ${username} found a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+  catchMessage = `✨ ${username} found a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! [${serverCatch.rarity}] +${serverCatch.coins} coins`
 } else {
-  catchMessage = `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! +${serverCatch.coins} coins`
+  catchMessage = `🎣 ${username} caught a ${serverCatch.weight.toFixed(1)} lb ${serverCatch.name}! [${serverCatch.rarity}] +${serverCatch.coins} coins`
 }
+
 if (serverCatch.specialMessage) {
   catchMessage += ` ${serverCatch.specialMessage}`
 }
