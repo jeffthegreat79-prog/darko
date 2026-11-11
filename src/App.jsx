@@ -1406,11 +1406,13 @@ return () => clearInterval(interval)
         <div className="hero-copy">
           <p className="eyebrow">Interactive stream fishing</p>
 
-          <h1>
-            Rippin Lips
-            and
-            <span> Eatin chips.</span>
-          </h1>
+         
+<h1>
+  Rippin Lips
+  and
+  <span> Coffee Sips!</span>
+</h1>
+
 
           <p className="hero-description">
             Collect rare fish, earn coins, break records, and build your
